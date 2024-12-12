@@ -12,20 +12,22 @@ import java.awt.event.*;
 import java.io.IOException;
 import javax.media.opengl.*;
 
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 import javax.media.opengl.glu.GLU;
 
 public class AnimGLEventListener4 extends AnimListener {
-    enum Directions{
+    public enum Directions{
         up,right,left,down,up_left,up_right,down_left,down_right;
     }
     Directions direction=Directions.up;
+    int monsterIndex = 5;
     int animationIndex = 0;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
-    int x1 = maxWidth/3, y1 = maxHeight-10;
-    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","background.jpg"};
+    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png", "background.jpg"};
     TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
     int textures[] = new int[textureNames.length];
     public void init(GLAutoDrawable gld) {
@@ -37,9 +39,9 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
         gl.glGenTextures(textureNames.length, textures, 0);
 
-        for(int i = 0; i < textureNames.length; i++){
+        for (int i = 0; i < textureNames.length; i++) {
             try {
-                texture[i] = TextureReader.readTexture(assetsFolderName + "//" + textureNames[i] , true);
+                texture[i] = TextureReader.readTexture(assetsFolderName + "//" + textureNames[i], true);
                 gl.glBindTexture(GL.GL_TEXTURE_2D, textures[i]);
 
 //                mipmapsFromPNG(gl, new GLU(), texture[i]);
@@ -51,26 +53,49 @@ public class AnimGLEventListener4 extends AnimListener {
                         GL.GL_UNSIGNED_BYTE,
                         texture[i].getPixels() // Imagedata
                 );
-            } catch( IOException e ) {
+            } catch (IOException e) {
                 System.out.println(e);
                 e.printStackTrace();
             }
+
+            int rand = (int) Math.random() * 10;
+
+
         }
     }
-
+    int cnt=0;
+    List<monstor>list=new ArrayList<>();
+    int zombieIndex;
+    long changeLag = System.currentTimeMillis();
+    long startTime = System.currentTimeMillis();
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);       //Clear The Screen And The Depth Buffer
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
         DrawBackground(gl);
         handleKeyPress();
         animationIndex = animationIndex % 4;
-//        DrawGraph(gl);
-        DrawSprite(gl, x, y, animationIndex, 1,direction);
-        double dist = sqrdDistance(x,y,x1,y1);
-        double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-        boolean isCollided = dist<=50;
-        System.out.println(isCollided + ", "+ dist + ", "+ radii);
+        DrawSprite(gl, x, y, animationIndex, 1,direction);// player
+
+
+        long currentTime=System.currentTimeMillis();
+        if (currentTime-changeLag>=1000){
+             zombieIndex=(int)(Math.random()*4)+5;
+        }
+        if(cnt<10) {
+            if (currentTime - startTime >= 4000) {
+                int rx = (int) (Math.random() * maxWidth) - maxWidth;
+                int ry = (int) (Math.random() * maxHeight) - maxHeight;
+                list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
+                startTime = currentTime;
+                cnt++;
+            }
+        }
+
+        for (monstor m : list) {
+            moveMonster(m,list);
+            DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
+        }
 
     }
     public double sqrdDistance(int x, int y, int x1, int y1){
@@ -82,6 +107,70 @@ public class AnimGLEventListener4 extends AnimListener {
 
     public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
     }
+    public void moveMonster(monstor monster,List<monstor>l) {
+        int dx=monster.x-x;
+        int dy=monster.y-y;
+        int sqrt=dx*dx+dy*dy;
+        if (sqrt<100) {
+            return;
+        }
+        for (monstor m : l) {
+            if(m!=monster) {
+                int dxx=m.x-monster.x;
+                int dyy=m.y-monster.y;
+                int sqr=dxx*dxx+dyy*dyy;
+                if (sqr<100) {
+                    if (monster.x>m.x) {
+                        monster.x++;
+                    } else {
+                        monster.x--;
+                    }
+                    if (monster.y>m.y) {
+                        monster.y++;
+                    } else {
+                        monster.y--;
+                    }
+                }
+            }
+        }
+
+        if (Math.abs(monster.y - y) < 2) {
+            if (monster.x > x) {
+                monster.dir = Directions.right;
+                monster.x -= 1;
+            } else if (monster.x < x) {
+                monster.dir = Directions.left;
+                monster.x += 1;
+            }
+        } else if (Math.abs(monster.x - x) < 2) {
+            if (monster.y > y) {
+                monster.dir = Directions.up;
+                monster.y -= 1;
+            } else if (monster.y < y) {
+                monster.dir = Directions.down;
+                monster.y += 1;
+            }
+        } else {
+            if (monster.x > x && monster.y > y) {
+                monster.dir = Directions.up_right;
+                monster.x -= 1;
+                monster.y -= 1;
+            } else if (monster.x < x && monster.y > y) {
+                monster.dir = Directions.up_left;
+                monster.x += 1;
+                monster.y -= 1;
+            } else if (monster.x > x && monster.y < y) {
+                monster.dir = Directions.down_right;
+                monster.x -= 1;
+                monster.y += 1;
+            } else if (monster.x < x && monster.y < y) {
+                monster.dir = Directions.down_left;
+                monster.x += 1;
+                monster.y += 1;
+            }
+        }
+    }
+
 
     public void DrawSprite(GL gl,int x, int y, int index, float scale,Directions dir){
         gl.glEnable(GL.GL_BLEND);
@@ -120,9 +209,35 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glDisable(GL.GL_BLEND);
     }
 
+    public void drawMonstor(GL gl ,int x,int y,int index,float scale,Directions dir){
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);	// Turn Blending On
+
+        gl.glPushMatrix();
+        gl.glTranslated( x/(maxWidth/2.0) - 0.9, y/(maxHeight/2.0) - 0.9, 0);
+        gl.glScaled(0.1*scale, 0.1*scale, 1);
+        //System.out.println(x +" " + y);
+        gl.glBegin(GL.GL_QUADS);
+        // Front Face
+        gl.glTexCoord2f(0.0f, 0.0f);
+        gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 0.0f);
+        gl.glVertex3f(1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 1.0f);
+        gl.glVertex3f(1.0f, 1.0f, -1.0f);
+        gl.glTexCoord2f(0.0f, 1.0f);
+        gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+        gl.glEnd();
+        gl.glPopMatrix();
+
+        gl.glDisable(GL.GL_BLEND);
+    }
+
+
     public void DrawBackground(GL gl){
         gl.glEnable(GL.GL_BLEND);
-        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[textures.length-1]);	// Turn Blending On
+        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[textures.length-1]);
+        // Turn Blending On
 
         gl.glPushMatrix();
         gl.glBegin(GL.GL_QUADS);
