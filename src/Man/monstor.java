@@ -1,7 +1,5 @@
 package Man;
 
-import Man.AnimGLEventListener4;
-
 import javax.media.opengl.GL;
 
 public class monstor {
