@@ -60,10 +60,13 @@ public class MouseMotionEventListener implements GLEventListener, MouseMotionLis
     public void mouseMoved(MouseEvent e) {
         x = convertX(e.getX(), e.getComponent().getWidth());
         y = convertY(e.getY(), e.getComponent().getHeight());
+
+
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
+
 
     }
 }
