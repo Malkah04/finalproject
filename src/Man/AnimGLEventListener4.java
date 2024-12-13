@@ -18,20 +18,23 @@ import java.util.List;
 import javax.media.opengl.glu.GLU;
 
 public class AnimGLEventListener4 extends AnimListener {
+
     public enum Directions{
         up,right,left,down,up_left,up_right,down_left,down_right;
     }
+
+    List<Bullet> bullets = new ArrayList<>();
+    long lastBulletTime = System.currentTimeMillis();
     Directions direction=Directions.up;
     int monsterIndex = 5;
     int animationIndex = 0;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
-    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png", "background.jpg"};
+    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullets 1.png", "background.jpg"};
     TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
     int textures[] = new int[textureNames.length];
     public void init(GLAutoDrawable gld) {
-
         GL gl = gld.getGL();
         gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);    //This Will Clear The Background Color To Black
 
@@ -63,6 +66,17 @@ public class AnimGLEventListener4 extends AnimListener {
 
         }
     }
+    public void shootBullet() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastBulletTime < 300) {
+            return;
+        }
+
+        int bulletIndex = 9;
+        bullets.add(new Bullet(x, y, bulletIndex, direction));
+        lastBulletTime = currentTime;
+    }
+
     int cnt=0;
     List<monstor>list=new ArrayList<>();
     int zombieIndex;
@@ -76,7 +90,6 @@ public class AnimGLEventListener4 extends AnimListener {
         handleKeyPress();
         animationIndex = animationIndex % 4;
         DrawSprite(gl, x, y, animationIndex, 1,direction);// player
-
 
         long currentTime=System.currentTimeMillis();
         if (currentTime-changeLag>=1000){
@@ -96,7 +109,23 @@ public class AnimGLEventListener4 extends AnimListener {
             moveMonster(m,list);
             DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
         }
-
+        List<Bullet> bulletsToRemove = new ArrayList<>();
+        for (Bullet bullet : bullets) {
+            bullet.move();
+            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
+            if (bullet.x < 0 || bullet.x > maxWidth || bullet.y < 0 || bullet.y > maxHeight) {
+                bulletsToRemove.add(bullet);
+            }
+        //remove monstor
+            for (monstor m : list) {
+                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
+                    bulletsToRemove.add(bullet);
+                    list.remove(m);
+                    break;
+                }
+            }
+        }
+        bullets.removeAll(bulletsToRemove);
     }
     public double sqrdDistance(int x, int y, int x1, int y1){
         return Math.pow(x-x1,2)+Math.pow(y-y1,2);
@@ -353,5 +382,30 @@ public class AnimGLEventListener4 extends AnimListener {
 
     public boolean isKeyPressed(final int keyCode) {
         return keyBits.get(keyCode);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        shootBullet();
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
     }
 }
