@@ -1,12 +1,4 @@
 package Man;
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-//package project;
-
 import Texture.TextureReader;
 import sounddd.voice;
 
@@ -22,7 +14,7 @@ import javax.media.opengl.glu.GLU;
 public class AnimGLEventListener4 extends AnimListener {
 
     public enum Directions{
-        up,right,left,down,up_left,up_right,down_left,down_right;
+        up,right,left,down,up_left,up_right,down_left,down_right
     }
 
     List<Bullet> bullets = new ArrayList<>();
@@ -32,31 +24,23 @@ public class AnimGLEventListener4 extends AnimListener {
     private int targetX;
     private int targetY;
     private boolean isMoving = false;
-    int monsterIndex = 5;
     int animationIndex = 0;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
-
-
-    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullesta.png","blood).png", "background.jpg"};
-
     boolean gameOver = false;
-    int gameDuration = 60000;
+    int gameDuration = 20000;
     long gameStartTime;
-    int initialTime = 60;
+    int initialTime = 20;
 
-    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
+    String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
             ,"zombie top 3.png","zombie top 4.png","bullets 1.png","Upper_G.png","Upper_A.png","Upper_M.png","Upper_E.png",
-            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png", "background.jpg"};
+            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png","Blood).png", "background.jpg"};
 
 
-    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullets 1.png","blood).png", "background.jpg"};
-
-
-    TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
-    int textures[] = new int[textureNames.length];
+    TextureReader.Texture[] texture = new TextureReader.Texture[textureNames.length];
+    int[] textures = new int[textureNames.length];
     public void init(GLAutoDrawable gld) {
         GL gl = gld.getGL();
         gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);    //This Will Clear The Background Color To Black
@@ -80,11 +64,11 @@ public class AnimGLEventListener4 extends AnimListener {
                         texture[i].getPixels() // Imagedata
                 );
             } catch (IOException e) {
-                System.out.println(e);
+                System.out.println();
                 e.printStackTrace();
             }
-            playMusic(0);
-            int rand = (int) Math.random() * 10;
+            if(!gameOver)playMusic(0);
+            else playMusic(4);
 
         }
         gameStartTime = System.currentTimeMillis();
@@ -114,7 +98,6 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
         DrawBackground(gl);
-
         if(!gameOver){
         DrawSprite(gl,2,90,17,0.5f,Directions.up);
         handleKeyPress();
@@ -123,7 +106,7 @@ public class AnimGLEventListener4 extends AnimListener {
         DrawSprite(gl, x, y, animationIndex, 1,direction);// player
 
         long currentTime=System.currentTimeMillis();
-        if (currentTime-changeLag>=1000){
+        if (currentTime-changeLag>=200){
             zombieIndex=(int)(Math.random()*4)+5;
         }
         if(cnt<10) {
@@ -135,7 +118,6 @@ public class AnimGLEventListener4 extends AnimListener {
                 cnt++;
             }
         }
-
         for (monstor m : list) {
             moveMonster(m,list);
             DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
@@ -166,19 +148,22 @@ public class AnimGLEventListener4 extends AnimListener {
                 }
                 changeLag = currentTime;
             }
-        drawTimer(gl,initialTime);
+             drawTimer(gl,initialTime);
 
             if(currentTime - gameStartTime > gameDuration && !list.isEmpty()){
-        gameOver = true;
-    }
+              gameOver = true;
+            }
         }
-        else drawGameOver(gl);
+            else {
+                drawGameOver(gl);
+        }
+
 
 
         //apeare blood
         for (Blood blood : bloodList) {
             if (blood.isVisible && !blood.isExpired()) {
-                DrawSprite(gl, blood.x, blood.y, 10, 1.0f, Directions.up);
+                DrawSprite(gl, blood.x, blood.y, textureNames.length-2, 1.0f, Directions.up);
             } else {
                 blood.isVisible = false;
             }
@@ -263,7 +248,7 @@ public class AnimGLEventListener4 extends AnimListener {
     public void DrawSprite(GL gl,int x, int y, int index, float scale,Directions dir){
         gl.glEnable(GL.GL_BLEND);
         gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);	// Turn Blending On
-        int angle=0;
+        int angle;
         switch (dir){
             case up: angle=0;break;
             case down:angle=180;break;
@@ -297,9 +282,9 @@ public class AnimGLEventListener4 extends AnimListener {
         int tens = time / 10;
         int ones = time % 10;
 
-        DrawSprite(gl, 8, 90, textures.length - 10 + (tens-1), 0.5f, Directions.up);
+        DrawSprite(gl, 8, 90, textures.length - 11 + (tens-1), 0.5f, Directions.up);
 
-        DrawSprite(gl, 14, 90, textures.length - 10 + (ones-1), 0.5f, Directions.up);
+        DrawSprite(gl, 14, 90, textures.length - 11 + (ones-1), 0.5f, Directions.up);
 
     }
 
@@ -315,32 +300,9 @@ public class AnimGLEventListener4 extends AnimListener {
         DrawSprite(gl,startX+60,y,15,1,Directions.up);
         DrawSprite(gl,startX+70,y,13,1,Directions.up);
         DrawSprite(gl,startX+80,y,16,1,Directions.up);
+        SoundEf(4);
+
     }
-    public void drawMonstor(GL gl ,int x,int y,int index,float scale,Directions dir){
-        gl.glEnable(GL.GL_BLEND);
-        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);	// Turn Blending On
-
-        gl.glPushMatrix();
-        gl.glTranslated( x/(maxWidth/2.0) - 0.9, y/(maxHeight/2.0) - 0.9, 0);
-        gl.glScaled(0.1*scale, 0.1*scale, 1);
-        //System.out.println(x +" " + y);
-        gl.glBegin(GL.GL_QUADS);
-        // Front Face
-        gl.glTexCoord2f(0.0f, 0.0f);
-        gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-        gl.glTexCoord2f(1.0f, 0.0f);
-        gl.glVertex3f(1.0f, -1.0f, -1.0f);
-        gl.glTexCoord2f(1.0f, 1.0f);
-        gl.glVertex3f(1.0f, 1.0f, -1.0f);
-        gl.glTexCoord2f(0.0f, 1.0f);
-        gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-        gl.glEnd();
-        gl.glPopMatrix();
-
-        gl.glDisable(GL.GL_BLEND);
-    }
-
-
     public void DrawBackground(GL gl){
         gl.glEnable(GL.GL_BLEND);
         gl.glBindTexture(GL.GL_TEXTURE_2D, textures[textures.length-1]);
@@ -539,12 +501,8 @@ public class AnimGLEventListener4 extends AnimListener {
 
     }
     public void playMusic(int i){
-      vic.setFile(i);
-      vic.play();
-      vic.loop();
-    }
-    public void stopMusic( ){
-        vic.stop();
+        vic.setFile(i);
+        vic.play();
     }
     public void SoundEf(int i){
         vic.setFile(i);

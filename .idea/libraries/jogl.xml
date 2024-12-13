@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="jogl">
-    <CLASSES>
-      <root url="jar://D:/jogl/JOGLwin/lib64/jogl.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
