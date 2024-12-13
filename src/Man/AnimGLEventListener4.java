@@ -38,7 +38,19 @@ public class AnimGLEventListener4 extends AnimListener {
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
 
+    boolean gameOver = false;
+    int gameDuration = 60000;
+    long gameStartTime;
+    int initialTime = 60;
+
+    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
+            ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
+            ,"zombie top 3.png","zombie top 4.png","bullets 1.png","Upper_G.png","Upper_A.png","Upper_M.png","Upper_E.png",
+            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png", "background.jpg"};
+
+
     String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullets 1.png","blood).png", "background.jpg"};
+
     TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
     int textures[] = new int[textureNames.length];
     public void init(GLAutoDrawable gld) {
@@ -71,6 +83,7 @@ public class AnimGLEventListener4 extends AnimListener {
             int rand = (int) Math.random() * 10;
 
         }
+        gameStartTime = System.currentTimeMillis();
     }
     public void shootBullet() {
         long currentTime = System.currentTimeMillis();
@@ -97,6 +110,9 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
         DrawBackground(gl);
+
+        if(!gameOver){
+        DrawSprite(gl,2,90,17,0.5f,Directions.up);
         handleKeyPress();
         handleMouse();
         animationIndex = animationIndex % 4;
@@ -104,7 +120,7 @@ public class AnimGLEventListener4 extends AnimListener {
 
         long currentTime=System.currentTimeMillis();
         if (currentTime-changeLag>=1000){
-             zombieIndex=(int)(Math.random()*4)+5;
+            zombieIndex=(int)(Math.random()*4)+5;
         }
         if(cnt<10) {
             if (currentTime - startTime >= 4000) {
@@ -127,7 +143,7 @@ public class AnimGLEventListener4 extends AnimListener {
             if (bullet.x < 0 || bullet.x > maxWidth || bullet.y < 0 || bullet.y > maxHeight) {
                 bulletsToRemove.add(bullet);
             }
-        //remove monstor
+            //remove monstor
             for (monstor m : list) {
                 if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
                     bulletsToRemove.add(bullet);
@@ -138,6 +154,23 @@ public class AnimGLEventListener4 extends AnimListener {
             }
         }
         bullets.removeAll(bulletsToRemove);
+
+
+            if (currentTime - changeLag >= 1000) {
+                if (initialTime > 0) {
+                    initialTime--;
+                }
+                changeLag = currentTime;
+            }
+        drawTimer(gl,initialTime);
+
+            if(currentTime - gameStartTime > gameDuration && !list.isEmpty()){
+        gameOver = true;
+    }
+        }
+        else drawGameOver(gl);
+
+
         //apeare blood
         for (Blood blood : bloodList) {
             if (blood.isVisible && !blood.isExpired()) {
@@ -146,6 +179,7 @@ public class AnimGLEventListener4 extends AnimListener {
                 blood.isVisible = false;
             }
         }
+
     }
     public double sqrdDistance(int x, int y, int x1, int y1){
         return Math.pow(x-x1,2)+Math.pow(y-y1,2);
@@ -255,7 +289,29 @@ public class AnimGLEventListener4 extends AnimListener {
 
         gl.glDisable(GL.GL_BLEND);
     }
+    public void drawTimer(GL gl, int time) {
+        int tens = time / 10;
+        int ones = time % 10;
 
+        DrawSprite(gl, 8, 90, textures.length - 10 + (tens-1), 0.5f, Directions.up);
+
+        DrawSprite(gl, 14, 90, textures.length - 10 + (ones-1), 0.5f, Directions.up);
+
+    }
+
+    public void drawGameOver(GL gl){
+        int startX = 5;
+        int y = 50;
+        DrawSprite(gl,startX,y,10,1,Directions.up);
+        DrawSprite(gl,startX+10,y,11,1, Directions.up);
+        DrawSprite(gl,startX+20,y,12,1,Directions.up);
+        DrawSprite(gl,startX+30,y,13,1,Directions.up);
+
+        DrawSprite(gl,startX+50,y,14,1,Directions.up);
+        DrawSprite(gl,startX+60,y,15,1,Directions.up);
+        DrawSprite(gl,startX+70,y,13,1,Directions.up);
+        DrawSprite(gl,startX+80,y,16,1,Directions.up);
+    }
     public void drawMonstor(GL gl ,int x,int y,int index,float scale,Directions dir){
         gl.glEnable(GL.GL_BLEND);
         gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);	// Turn Blending On
