@@ -8,6 +8,8 @@ package Man;
 //package project;
 
 import Texture.TextureReader;
+import sounddd.voice;
+
 import java.awt.event.*;
 import java.io.IOException;
 import javax.media.opengl.*;
@@ -60,9 +62,8 @@ public class AnimGLEventListener4 extends AnimListener {
                 System.out.println(e);
                 e.printStackTrace();
             }
-
+            playMusic(0);
             int rand = (int) Math.random() * 10;
-
 
         }
     }
@@ -74,8 +75,10 @@ public class AnimGLEventListener4 extends AnimListener {
 
         int bulletIndex = 9;
         bullets.add(new Bullet(x, y, bulletIndex, direction));
+        SoundEf(2);//ok
         lastBulletTime = currentTime;
     }
+    voice vic=new voice();
 
     int cnt=0;
     List<monstor>list=new ArrayList<>();
@@ -137,6 +140,7 @@ public class AnimGLEventListener4 extends AnimListener {
     public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
     }
     public void moveMonster(monstor monster,List<monstor>l) {
+        if(cnt<=10&&monster.x<=maxWidth&&monster.y<=maxHeight&&monster.x>=0&&monster.y>=0)SoundEf(1);
         int dx=monster.x-x;
         int dy=monster.y-y;
         int sqrt=dx*dx+dy*dy;
@@ -285,12 +289,8 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glDisable(GL.GL_BLEND);
     }
 
-    /*
-     * KeyListener
-     */
-
     public void handleKeyPress() {
-
+        boolean move=false;
         if (isKeyPressed(KeyEvent.VK_LEFT) && isKeyPressed(KeyEvent.VK_DOWN)) {
             if (x > 0) {
                 x--;
@@ -300,7 +300,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction = Directions.down_left;
             animationIndex++;
-
+            move=true;
         } else if (isKeyPressed(KeyEvent.VK_RIGHT) && isKeyPressed(KeyEvent.VK_DOWN)) {
             if (x < maxWidth - 10) {
                 x++;
@@ -310,6 +310,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction = Directions.down_right;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_LEFT) && isKeyPressed(KeyEvent.VK_UP)) {
             if (x > 0) {
@@ -320,6 +321,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction = Directions.up_left;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_RIGHT) && isKeyPressed(KeyEvent.VK_UP)){
             if (x < maxWidth-10) {
@@ -330,6 +332,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.up_right;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_LEFT)) {
             if (x > 0) {
@@ -337,6 +340,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.left;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_RIGHT)) {
             if (x < maxWidth-10) {
@@ -344,6 +348,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.right;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_DOWN)) {
             if (y > 0) {
@@ -351,6 +356,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.down;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_UP)) {
             if (y < maxHeight-10) {
@@ -358,7 +364,10 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.up;
             animationIndex++;
+            move=true;
         }
+        if(move)SoundEf(3); //ok
+
     }
 
     public BitSet keyBits = new BitSet(256);
@@ -407,5 +416,17 @@ public class AnimGLEventListener4 extends AnimListener {
     @Override
     public void mouseExited(MouseEvent e) {
 
+    }
+    public void playMusic(int i){
+      vic.setFile(i);
+      vic.play();
+      vic.loop();
+    }
+    public void stopMusic( ){
+        vic.stop();
+    }
+    public void SoundEf(int i){
+        vic.setFile(i);
+        vic.play();
     }
 }
