@@ -14,6 +14,7 @@ public class voice {
         soundURl[3]=getClass().getResource("/music/walkkkk.wav");//walk
         soundURl[1]=getClass().getResource("/music/monster.wav"); //monster
         soundURl[0]=getClass().getResource("/music/mixkit-horror-sci-fi-wind-tunnel-894.wav");//the best back
+        soundURl[4]=getClass().getResource("/music/gameover.wav");
 
 
 
