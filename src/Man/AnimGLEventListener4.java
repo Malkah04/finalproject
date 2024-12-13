@@ -28,12 +28,17 @@ public class AnimGLEventListener4 extends AnimListener {
     List<Bullet> bullets = new ArrayList<>();
     long lastBulletTime = System.currentTimeMillis();
     Directions direction=Directions.up;
+
+    private int targetX;
+    private int targetY;
+    private boolean isMoving = false;
     int monsterIndex = 5;
     int animationIndex = 0;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
-    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullets 1.png", "background.jpg"};
+
+    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullets 1.png","blood.jpg", "background.jpg"};
     TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
     int textures[] = new int[textureNames.length];
     public void init(GLAutoDrawable gld) {
@@ -82,6 +87,8 @@ public class AnimGLEventListener4 extends AnimListener {
 
     int cnt=0;
     List<monstor>list=new ArrayList<>();
+    List<Blood> bloodList = new ArrayList<>();
+
     int zombieIndex;
     long changeLag = System.currentTimeMillis();
     long startTime = System.currentTimeMillis();
@@ -91,6 +98,7 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glLoadIdentity();
         DrawBackground(gl);
         handleKeyPress();
+        handleMouse();
         animationIndex = animationIndex % 4;
         DrawSprite(gl, x, y, animationIndex, 1,direction);// player
 
@@ -124,11 +132,20 @@ public class AnimGLEventListener4 extends AnimListener {
                 if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
                     bulletsToRemove.add(bullet);
                     list.remove(m);
+                    bloodList.add(new Blood(m.x, m.y));
                     break;
                 }
             }
         }
         bullets.removeAll(bulletsToRemove);
+        //apeare blood
+        for (Blood blood : bloodList) {
+            if (blood.isVisible && !blood.isExpired()) {
+                DrawSprite(gl, blood.x, blood.y, 10, 1.0f, Directions.up);
+            } else {
+                blood.isVisible = false;
+            }
+        }
     }
     public double sqrdDistance(int x, int y, int x1, int y1){
         return Math.pow(x-x1,2)+Math.pow(y-y1,2);
@@ -228,14 +245,11 @@ public class AnimGLEventListener4 extends AnimListener {
         //System.out.println(x +" " + y);
         gl.glBegin(GL.GL_QUADS);
         // Front Face
-        gl.glTexCoord2f(0.0f, 0.0f);
-        gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-        gl.glTexCoord2f(1.0f, 0.0f);
-        gl.glVertex3f(1.0f, -1.0f, -1.0f);
-        gl.glTexCoord2f(1.0f, 1.0f);
-        gl.glVertex3f(1.0f, 1.0f, -1.0f);
-        gl.glTexCoord2f(0.0f, 1.0f);
-        gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+        gl.glBegin(GL.GL_QUADS);
+        gl.glTexCoord2f(0.0f, 0.0f); gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 0.0f); gl.glVertex3f(1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 1.0f); gl.glVertex3f(1.0f, 1.0f, -1.0f);
+        gl.glTexCoord2f(0.0f, 1.0f); gl.glVertex3f(-1.0f, 1.0f, -1.0f);
         gl.glEnd();
         gl.glPopMatrix();
 
@@ -369,6 +383,33 @@ public class AnimGLEventListener4 extends AnimListener {
         if(move)SoundEf(3); //ok
 
     }
+    public void handleMouse(){
+        if (isMoving) {
+            int dx = targetX - x;
+            int dy = targetY - y;
+
+            if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
+                isMoving = false;
+            } else {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    x += (dx > 0) ? 1 : -1;
+                    direction = (dx > 0) ? Directions.right : Directions.left;
+                } else {
+                    y += (dy > 0) ? 1 : -1;
+                    direction = (dy > 0) ? Directions.up : Directions.down;
+                }
+
+                if (dx != 0 && dy != 0) {
+                    if (dx > 0 && dy > 0) direction = Directions.up_right;
+                    if (dx > 0 && dy < 0) direction = Directions.down_right;
+                    if (dx < 0 && dy > 0) direction = Directions.up_left;
+                    if (dx < 0 && dy < 0) direction = Directions.down_left;
+                }
+            }
+        }
+    }
+
+
 
     public BitSet keyBits = new BitSet(256);
 
@@ -398,9 +439,25 @@ public class AnimGLEventListener4 extends AnimListener {
 
     }
 
+
+
+    public void mouseMoved(MouseEvent e) {
+        targetX = (int) ((e.getX() / (double) maxWidth) * maxWidth);
+        targetY = maxHeight - (int) ((e.getY() / (double) maxHeight) * maxHeight);
+
+        isMoving = true;
+
+    }
+
+    public void mouseDragged(MouseEvent e) {
+       mouseMoved(e);
+    }
+
+
     @Override
     public void mousePressed(MouseEvent e) {
         shootBullet();
+
     }
 
     @Override
