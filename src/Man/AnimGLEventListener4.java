@@ -8,6 +8,8 @@ package Man;
 //package project;
 
 import Texture.TextureReader;
+import sounddd.voice;
+
 import java.awt.event.*;
 import java.io.IOException;
 import javax.media.opengl.*;
@@ -26,11 +28,16 @@ public class AnimGLEventListener4 extends AnimListener {
     List<Bullet> bullets = new ArrayList<>();
     long lastBulletTime = System.currentTimeMillis();
     Directions direction=Directions.up;
+
+    private int targetX;
+    private int targetY;
+    private boolean isMoving = false;
     int monsterIndex = 5;
     int animationIndex = 0;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
+
     boolean gameOver = false;
     int gameDuration = 60000;
     long gameStartTime;
@@ -40,6 +47,10 @@ public class AnimGLEventListener4 extends AnimListener {
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
             ,"zombie top 3.png","zombie top 4.png","bullets 1.png","Upper_G.png","Upper_A.png","Upper_M.png","Upper_E.png",
             "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png", "background.jpg"};
+
+
+    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullets 1.png","blood).png", "background.jpg"};
+
     TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
     int textures[] = new int[textureNames.length];
     public void init(GLAutoDrawable gld) {
@@ -68,9 +79,8 @@ public class AnimGLEventListener4 extends AnimListener {
                 System.out.println(e);
                 e.printStackTrace();
             }
-
+            playMusic(0);
             int rand = (int) Math.random() * 10;
-
 
         }
         gameStartTime = System.currentTimeMillis();
@@ -83,11 +93,15 @@ public class AnimGLEventListener4 extends AnimListener {
 
         int bulletIndex = 9;
         bullets.add(new Bullet(x, y, bulletIndex, direction));
+        SoundEf(2);//ok
         lastBulletTime = currentTime;
     }
+    voice vic=new voice();
 
     int cnt=0;
     List<monstor>list=new ArrayList<>();
+    List<Blood> bloodList = new ArrayList<>();
+
     int zombieIndex;
     long changeLag = System.currentTimeMillis();
     long startTime = System.currentTimeMillis();
@@ -100,6 +114,7 @@ public class AnimGLEventListener4 extends AnimListener {
         if(!gameOver){
         DrawSprite(gl,2,90,17,0.5f,Directions.up);
         handleKeyPress();
+        handleMouse();
         animationIndex = animationIndex % 4;
         DrawSprite(gl, x, y, animationIndex, 1,direction);// player
 
@@ -133,11 +148,13 @@ public class AnimGLEventListener4 extends AnimListener {
                 if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
                     bulletsToRemove.add(bullet);
                     list.remove(m);
+                    bloodList.add(new Blood(m.x, m.y));
                     break;
                 }
             }
         }
         bullets.removeAll(bulletsToRemove);
+
 
             if (currentTime - changeLag >= 1000) {
                 if (initialTime > 0) {
@@ -153,6 +170,16 @@ public class AnimGLEventListener4 extends AnimListener {
         }
         else drawGameOver(gl);
 
+
+        //apeare blood
+        for (Blood blood : bloodList) {
+            if (blood.isVisible && !blood.isExpired()) {
+                DrawSprite(gl, blood.x, blood.y, 10, 1.0f, Directions.up);
+            } else {
+                blood.isVisible = false;
+            }
+        }
+
     }
     public double sqrdDistance(int x, int y, int x1, int y1){
         return Math.pow(x-x1,2)+Math.pow(y-y1,2);
@@ -164,6 +191,7 @@ public class AnimGLEventListener4 extends AnimListener {
     public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
     }
     public void moveMonster(monstor monster,List<monstor>l) {
+        if(cnt<=10&&monster.x<=maxWidth&&monster.y<=maxHeight&&monster.x>=0&&monster.y>=0)SoundEf(1);
         int dx=monster.x-x;
         int dy=monster.y-y;
         int sqrt=dx*dx+dy*dy;
@@ -251,14 +279,11 @@ public class AnimGLEventListener4 extends AnimListener {
         //System.out.println(x +" " + y);
         gl.glBegin(GL.GL_QUADS);
         // Front Face
-        gl.glTexCoord2f(0.0f, 0.0f);
-        gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-        gl.glTexCoord2f(1.0f, 0.0f);
-        gl.glVertex3f(1.0f, -1.0f, -1.0f);
-        gl.glTexCoord2f(1.0f, 1.0f);
-        gl.glVertex3f(1.0f, 1.0f, -1.0f);
-        gl.glTexCoord2f(0.0f, 1.0f);
-        gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+        gl.glBegin(GL.GL_QUADS);
+        gl.glTexCoord2f(0.0f, 0.0f); gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 0.0f); gl.glVertex3f(1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 1.0f); gl.glVertex3f(1.0f, 1.0f, -1.0f);
+        gl.glTexCoord2f(0.0f, 1.0f); gl.glVertex3f(-1.0f, 1.0f, -1.0f);
         gl.glEnd();
         gl.glPopMatrix();
 
@@ -334,12 +359,8 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glDisable(GL.GL_BLEND);
     }
 
-    /*
-     * KeyListener
-     */
-
     public void handleKeyPress() {
-
+        boolean move=false;
         if (isKeyPressed(KeyEvent.VK_LEFT) && isKeyPressed(KeyEvent.VK_DOWN)) {
             if (x > 0) {
                 x--;
@@ -349,7 +370,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction = Directions.down_left;
             animationIndex++;
-
+            move=true;
         } else if (isKeyPressed(KeyEvent.VK_RIGHT) && isKeyPressed(KeyEvent.VK_DOWN)) {
             if (x < maxWidth - 10) {
                 x++;
@@ -359,6 +380,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction = Directions.down_right;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_LEFT) && isKeyPressed(KeyEvent.VK_UP)) {
             if (x > 0) {
@@ -369,6 +391,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction = Directions.up_left;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_RIGHT) && isKeyPressed(KeyEvent.VK_UP)){
             if (x < maxWidth-10) {
@@ -379,6 +402,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.up_right;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_LEFT)) {
             if (x > 0) {
@@ -386,6 +410,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.left;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_RIGHT)) {
             if (x < maxWidth-10) {
@@ -393,6 +418,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.right;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_DOWN)) {
             if (y > 0) {
@@ -400,6 +426,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.down;
             animationIndex++;
+            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_UP)) {
             if (y < maxHeight-10) {
@@ -407,8 +434,38 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             direction=Directions.up;
             animationIndex++;
+            move=true;
+        }
+        if(move)SoundEf(3); //ok
+
+    }
+    public void handleMouse(){
+        if (isMoving) {
+            int dx = targetX - x;
+            int dy = targetY - y;
+
+            if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
+                isMoving = false;
+            } else {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    x += (dx > 0) ? 1 : -1;
+                    direction = (dx > 0) ? Directions.right : Directions.left;
+                } else {
+                    y += (dy > 0) ? 1 : -1;
+                    direction = (dy > 0) ? Directions.up : Directions.down;
+                }
+
+                if (dx != 0 && dy != 0) {
+                    if (dx > 0 && dy > 0) direction = Directions.up_right;
+                    if (dx > 0 && dy < 0) direction = Directions.down_right;
+                    if (dx < 0 && dy > 0) direction = Directions.up_left;
+                    if (dx < 0 && dy < 0) direction = Directions.down_left;
+                }
+            }
         }
     }
+
+
 
     public BitSet keyBits = new BitSet(256);
 
@@ -438,9 +495,25 @@ public class AnimGLEventListener4 extends AnimListener {
 
     }
 
+
+
+    public void mouseMoved(MouseEvent e) {
+        targetX = (int) ((e.getX() / (double) maxWidth) * maxWidth);
+        targetY = maxHeight - (int) ((e.getY() / (double) maxHeight) * maxHeight);
+
+        isMoving = true;
+
+    }
+
+    public void mouseDragged(MouseEvent e) {
+       mouseMoved(e);
+    }
+
+
     @Override
     public void mousePressed(MouseEvent e) {
         shootBullet();
+
     }
 
     @Override
@@ -456,5 +529,17 @@ public class AnimGLEventListener4 extends AnimListener {
     @Override
     public void mouseExited(MouseEvent e) {
 
+    }
+    public void playMusic(int i){
+      vic.setFile(i);
+      vic.play();
+      vic.loop();
+    }
+    public void stopMusic( ){
+        vic.stop();
+    }
+    public void SoundEf(int i){
+        vic.setFile(i);
+        vic.play();
     }
 }
