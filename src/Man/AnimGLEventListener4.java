@@ -38,6 +38,9 @@ public class AnimGLEventListener4 extends AnimListener {
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
 
+
+    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullesta.png","blood).png", "background.jpg"};
+
     boolean gameOver = false;
     int gameDuration = 60000;
     long gameStartTime;
@@ -50,6 +53,7 @@ public class AnimGLEventListener4 extends AnimListener {
 
 
     String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullets 1.png","blood).png", "background.jpg"};
+
 
     TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
     int textures[] = new int[textureNames.length];
@@ -436,6 +440,10 @@ public class AnimGLEventListener4 extends AnimListener {
             animationIndex++;
             move=true;
         }
+        if (isKeyPressed(KeyEvent.VK_SPACE)) {
+            shootBullet();
+        }
+
         if(move)SoundEf(3); //ok
 
     }
