@@ -8,8 +8,6 @@ package Man;
 //package project;
 
 import com.sun.opengl.util.*;
-import sounddd.voice;
-
 import java.awt.*;
 import javax.media.opengl.*;
 import javax.swing.*;
