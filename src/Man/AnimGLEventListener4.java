@@ -32,11 +32,13 @@ public class AnimGLEventListener4 extends AnimListener {
     int gameDuration = 20000;
     long gameStartTime;
     int initialTime = 20;
+    double powerHealth = 0;
+    double distance = 0.9;
 
     String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
             ,"zombie top 3.png","zombie top 4.png","bullets 1.png","Upper_G.png","Upper_A.png","Upper_M.png","Upper_E.png",
-            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png","Blood).png", "background.jpg"};
+            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png","Blood).png","RTS Status Indicator24.jpg","VIDA_8_0.png","VIDA_5.png","VIDA_3.png", "background.jpg"};
 
 
     TextureReader.Texture[] texture = new TextureReader.Texture[textureNames.length];
@@ -93,6 +95,8 @@ public class AnimGLEventListener4 extends AnimListener {
     int zombieIndex;
     long changeLag = System.currentTimeMillis();
     long startTime = System.currentTimeMillis();
+
+    boolean isCollided = false;
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
@@ -121,6 +125,14 @@ public class AnimGLEventListener4 extends AnimListener {
         for (monstor m : list) {
             moveMonster(m,list);
             DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
+            double dist = sqrdDistance(x,y,m.x,m.y);
+            double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
+            isCollided = dist<=83;
+            System.out.println(isCollided + ", "+ dist + ", "+ radii);
+            if(isCollided){
+                powerHealth = powerHealth+0.005;
+                isCollided=false;
+            }
         }
         List<Bullet> bulletsToRemove = new ArrayList<>();
         for (Bullet bullet : bullets) {
@@ -163,10 +175,21 @@ public class AnimGLEventListener4 extends AnimListener {
         //apeare blood
         for (Blood blood : bloodList) {
             if (blood.isVisible && !blood.isExpired()) {
-                DrawSprite(gl, blood.x, blood.y, textureNames.length-2, 1.0f, Directions.up);
+                DrawSprite(gl, blood.x, blood.y, 28, 1.0f, Directions.up);
             } else {
                 blood.isVisible = false;
             }
+        }
+
+        // the basic of powerHealth
+        PowerHealth(gl , 0.7,0.85,0.13,29);
+        // the green of powerHealth
+        PowerHealth(gl , 0.7+powerHealth,0.85,0.12,30);
+        if(powerHealth < 0.5 && powerHealth >0.2) {
+            PowerHealth(gl , 0.7+powerHealth,0.85,0.12,31);
+        }
+        if(powerHealth < 0.7 && powerHealth >0.5) {
+            PowerHealth(gl , 0.7+powerHealth,0.85,0.12,32);
         }
 
     }
@@ -309,6 +332,29 @@ public class AnimGLEventListener4 extends AnimListener {
         // Turn Blending On
 
         gl.glPushMatrix();
+        gl.glBegin(GL.GL_QUADS);
+        // Front Face
+        gl.glTexCoord2f(0.0f, 0.0f);
+        gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 0.0f);
+        gl.glVertex3f(1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 1.0f);
+        gl.glVertex3f(1.0f, 1.0f, -1.0f);
+        gl.glTexCoord2f(0.0f, 1.0f);
+        gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+        gl.glEnd();
+        gl.glPopMatrix();
+
+        gl.glDisable(GL.GL_BLEND);
+    }
+    public void PowerHealth(GL gl,double tx , double ty,double scale , int picture_index){
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[picture_index]);
+        // Turn Blending On
+
+        gl.glPushMatrix();
+        gl.glTranslated(tx,ty,0);
+        gl.glScaled(scale+0.2,scale-0.05,1);
         gl.glBegin(GL.GL_QUADS);
         // Front Face
         gl.glTexCoord2f(0.0f, 0.0f);
