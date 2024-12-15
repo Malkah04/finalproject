@@ -19,12 +19,16 @@ public class AnimGLEventListener4 extends AnimListener {
 
     List<Bullet> bullets = new ArrayList<>();
     long lastBulletTime = System.currentTimeMillis();
-    Directions direction=Directions.up;
+    Directions direction1 = Directions.up;
+    Directions direction2 = Directions.up;
 
     private int targetX;
     private int targetY;
     private boolean isMoving = false;
-    int animationIndex = 0;
+    int animationIndex = 0, animationIndex2 = 0;
+//    Player player1,player2;
+    int x2,y2;
+    boolean mult=false;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
@@ -33,12 +37,18 @@ public class AnimGLEventListener4 extends AnimListener {
     long gameStartTime;
     int initialTime = 20;
     double powerHealth = 0;
-    double distance = 0.9;
+    boolean heart1 =true;
+    boolean heart2 =true;
+    boolean heart3 =true;
+    boolean level = true;
+    boolean level1 =true;
+    boolean level2 = true;
+    boolean level3 = true;
 
     String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
             ,"zombie top 3.png","zombie top 4.png","bullets 1.png","Upper_G.png","Upper_A.png","Upper_M.png","Upper_E.png",
-            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png","Blood).png","RTS Status Indicator24.jpg","VIDA_8_0.png","VIDA_5.png","VIDA_3.png", "background.jpg"};
+            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png","Blood).png","RTS Status Indicator24.jpg","VIDA_8_0.png","VIDA_5.png","VIDA_3.png","heart_3.png", "background.jpg"};
 
 
     TextureReader.Texture[] texture = new TextureReader.Texture[textureNames.length];
@@ -82,7 +92,7 @@ public class AnimGLEventListener4 extends AnimListener {
         }
 
         int bulletIndex = 9;
-        bullets.add(new Bullet(x, y, bulletIndex, direction));
+        bullets.add(new Bullet(x, y, bulletIndex, direction1));
         SoundEf(2);//ok
         lastBulletTime = currentTime;
     }
@@ -107,8 +117,10 @@ public class AnimGLEventListener4 extends AnimListener {
         handleKeyPress();
         handleMouse();
         animationIndex = animationIndex % 4;
-        DrawSprite(gl, x, y, animationIndex, 1,direction);// player
-
+        animationIndex2 = animationIndex2 % 4;
+        DrawSprite(gl,x,y,animationIndex,1, direction1);
+        if(mult)
+        DrawSprite(gl,x2,y2,animationIndex2,1,direction2);
         long currentTime=System.currentTimeMillis();
         if (currentTime-changeLag>=200){
             zombieIndex=(int)(Math.random()*4)+5;
@@ -127,7 +139,7 @@ public class AnimGLEventListener4 extends AnimListener {
             DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
             double dist = sqrdDistance(x,y,m.x,m.y);
             double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-            isCollided = dist<=83;
+            isCollided = dist<=90;
             System.out.println(isCollided + ", "+ dist + ", "+ radii);
             if(isCollided){
                 powerHealth = powerHealth+0.005;
@@ -165,6 +177,40 @@ public class AnimGLEventListener4 extends AnimListener {
             if(currentTime - gameStartTime > gameDuration && !list.isEmpty()){
               gameOver = true;
             }
+            if(level1 || level2 || level3) {
+                // the basic of powerHealth
+                PowerHealth(gl, 0.7, 0.9, 0.33, 0.06, 29);
+                // the green of powerHealth
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 30);
+                // the yellow of powerHealth
+                if (powerHealth < 0.5 && powerHealth > 0.2) {
+                    PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 31);
+                }
+                // the red of powerHealth
+                if (powerHealth < 0.7 && powerHealth > 0.5) {
+                    PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 32);
+                }
+            }
+            if(heart1){
+                PowerHealth(gl , 0.0079,0.9,0.05,0.05,33);}
+            if(heart2){
+                PowerHealth(gl , 0.15,0.9,0.05,0.05,33);}
+            if(heart3){
+                PowerHealth(gl , 0.3,0.9,0.05,0.05,33);}
+
+            if (powerHealth > 0.62) {
+                if (level1) {
+                    heart3 = false;
+                    level1 = false;
+                } else if (level2) {
+                    heart2 = false;
+                    level2 = false;
+                } else if (level3) {
+                    heart1 = false;
+                    level3 = false;
+                }
+                powerHealth = 0;
+            }
         }
             else {
                 drawGameOver(gl);
@@ -179,17 +225,6 @@ public class AnimGLEventListener4 extends AnimListener {
             } else {
                 blood.isVisible = false;
             }
-        }
-
-        // the basic of powerHealth
-        PowerHealth(gl , 0.7,0.85,0.13,29);
-        // the green of powerHealth
-        PowerHealth(gl , 0.7+powerHealth,0.85,0.12,30);
-        if(powerHealth < 0.5 && powerHealth >0.2) {
-            PowerHealth(gl , 0.7+powerHealth,0.85,0.12,31);
-        }
-        if(powerHealth < 0.7 && powerHealth >0.5) {
-            PowerHealth(gl , 0.7+powerHealth,0.85,0.12,32);
         }
 
     }
@@ -347,14 +382,14 @@ public class AnimGLEventListener4 extends AnimListener {
 
         gl.glDisable(GL.GL_BLEND);
     }
-    public void PowerHealth(GL gl,double tx , double ty,double scale , int picture_index){
+    public void PowerHealth(GL gl,double tx , double ty,double scaleX ,double scaleY, int picture_index){
         gl.glEnable(GL.GL_BLEND);
         gl.glBindTexture(GL.GL_TEXTURE_2D, textures[picture_index]);
         // Turn Blending On
 
         gl.glPushMatrix();
         gl.glTranslated(tx,ty,0);
-        gl.glScaled(scale+0.2,scale-0.05,1);
+        gl.glScaled(scaleX,scaleY,1);
         gl.glBegin(GL.GL_QUADS);
         // Front Face
         gl.glTexCoord2f(0.0f, 0.0f);
@@ -380,9 +415,9 @@ public class AnimGLEventListener4 extends AnimListener {
             if (y > 0) {
                 y--;
             }
-            direction = Directions.down_left;
+            direction1 = Directions.down_left;
             animationIndex++;
-            move=true;
+
         } else if (isKeyPressed(KeyEvent.VK_RIGHT) && isKeyPressed(KeyEvent.VK_DOWN)) {
             if (x < maxWidth - 10) {
                 x++;
@@ -390,9 +425,8 @@ public class AnimGLEventListener4 extends AnimListener {
             if (y > 0) {
                 y--;
             }
-            direction = Directions.down_right;
+            direction1 = Directions.down_right;
             animationIndex++;
-            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_LEFT) && isKeyPressed(KeyEvent.VK_UP)) {
             if (x > 0) {
@@ -401,9 +435,8 @@ public class AnimGLEventListener4 extends AnimListener {
             if (y < maxHeight - 10) {
                 y++;
             }
-            direction = Directions.up_left;
+            direction1 = Directions.up_left;
             animationIndex++;
-            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_RIGHT) && isKeyPressed(KeyEvent.VK_UP)){
             if (x < maxWidth-10) {
@@ -412,42 +445,99 @@ public class AnimGLEventListener4 extends AnimListener {
             if (y < maxHeight-10) {
                 y++;
             }
-            direction=Directions.up_right;
+            direction1=Directions.up_right;
             animationIndex++;
-            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_LEFT)) {
             if (x > 0) {
                 x--;
             }
-            direction=Directions.left;
+            direction1=Directions.left;
             animationIndex++;
-            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_RIGHT)) {
             if (x < maxWidth-10) {
                 x++;
             }
-            direction=Directions.right;
+            direction1=Directions.right;
             animationIndex++;
-            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_DOWN)) {
             if (y > 0) {
                 y--;
             }
-            direction=Directions.down;
+            direction1=Directions.down;
             animationIndex++;
-            move=true;
         }
         else if (isKeyPressed(KeyEvent.VK_UP)) {
             if (y < maxHeight-10) {
                 y++;
             }
-            direction=Directions.up;
+            direction1=Directions.up;
             animationIndex++;
-            move=true;
         }
+        if (isKeyPressed(KeyEvent.VK_A) && isKeyPressed(KeyEvent.VK_S)) {
+            if (x2 > 0) {
+                x2--;
+            }
+            if (y2 > 0) {
+                y2--;
+            }
+            direction2 = Directions.down_left;
+            animationIndex2++;
+        } else if (isKeyPressed(KeyEvent.VK_D) && isKeyPressed(KeyEvent.VK_S)) {
+            if (x2 < maxWidth - 10) {
+                x2++;
+            }
+            if (y2 > 0) {
+                y2--;
+            }
+            direction2 = Directions.down_right;
+            animationIndex2++;
+        } else if (isKeyPressed(KeyEvent.VK_A) && isKeyPressed(KeyEvent.VK_W)) {
+            if (x2 > 0) {
+                x2--;
+            }
+            if (y2 < maxHeight - 10) {
+                y2++;
+            }
+            direction2 = Directions.up_left;
+            animationIndex2++;
+        } else if (isKeyPressed(KeyEvent.VK_D) && isKeyPressed(KeyEvent.VK_W)) {
+            if (x2 < maxWidth - 10) {
+                x2++;
+            }
+            if (y2 < maxHeight - 10) {
+                y2++;
+            }
+            direction2 = Directions.up_right;
+            animationIndex2++;
+        } else if (isKeyPressed(KeyEvent.VK_A)) {
+            if (x2 > 0) {
+                x2--;
+            }
+            direction2 = Directions.left;
+            animationIndex2++;
+        } else if (isKeyPressed(KeyEvent.VK_D)) {
+            if (x2 < maxWidth - 10) {
+                x2++;
+            }
+            direction2 = Directions.right;
+            animationIndex2++;
+        } else if (isKeyPressed(KeyEvent.VK_S)) {
+            if (y2 > 0) {
+                y2--;
+            }
+            direction2 = Directions.down;
+            animationIndex2++;
+        } else if (isKeyPressed(KeyEvent.VK_W)) {
+            if (y2 < maxHeight - 10) {
+                y2++;
+            }
+            direction2 = Directions.up;
+            animationIndex2++;
+        }
+
         if (isKeyPressed(KeyEvent.VK_SPACE)) {
             shootBullet();
         }
@@ -465,17 +555,17 @@ public class AnimGLEventListener4 extends AnimListener {
             } else {
                 if (Math.abs(dx) > Math.abs(dy)) {
                     x += (dx > 0) ? 1 : -1;
-                    direction = (dx > 0) ? Directions.right : Directions.left;
+                    direction1 = (dx > 0) ? Directions.right : Directions.left;
                 } else {
                     y += (dy > 0) ? 1 : -1;
-                    direction = (dy > 0) ? Directions.up : Directions.down;
+                    direction1 = (dy > 0) ? Directions.up : Directions.down;
                 }
 
                 if (dx != 0 && dy != 0) {
-                    if (dx > 0 && dy > 0) direction = Directions.up_right;
-                    if (dx > 0 && dy < 0) direction = Directions.down_right;
-                    if (dx < 0 && dy > 0) direction = Directions.up_left;
-                    if (dx < 0 && dy < 0) direction = Directions.down_left;
+                    if (dx > 0 && dy > 0) direction1 = Directions.up_right;
+                    if (dx > 0 && dy < 0) direction1= Directions.down_right;
+                    if (dx < 0 && dy > 0) direction1 = Directions.up_left;
+                    if (dx < 0 && dy < 0) direction1 = Directions.down_left;
                 }
             }
         }
