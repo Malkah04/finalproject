@@ -33,12 +33,18 @@ public class AnimGLEventListener4 extends AnimListener {
     long gameStartTime;
     int initialTime = 20;
     double powerHealth = 0;
-    double distance = 0.9;
+    boolean heart1 =true;
+    boolean heart2 =true;
+    boolean heart3 =true;
+    boolean level = true;
+    boolean level1 =true;
+    boolean level2 = true;
+    boolean level3 = true;
 
     String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
             ,"zombie top 3.png","zombie top 4.png","bullets 1.png","Upper_G.png","Upper_A.png","Upper_M.png","Upper_E.png",
-            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png","Blood).png","RTS Status Indicator24.jpg","VIDA_8_0.png","VIDA_5.png","VIDA_3.png", "background.jpg"};
+            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png","Blood).png","RTS Status Indicator24.jpg","VIDA_8_0.png","VIDA_5.png","VIDA_3.png","heart_3.png", "background.jpg"};
 
 
     TextureReader.Texture[] texture = new TextureReader.Texture[textureNames.length];
@@ -127,7 +133,7 @@ public class AnimGLEventListener4 extends AnimListener {
             DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
             double dist = sqrdDistance(x,y,m.x,m.y);
             double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-            isCollided = dist<=83;
+            isCollided = dist<=90;
             System.out.println(isCollided + ", "+ dist + ", "+ radii);
             if(isCollided){
                 powerHealth = powerHealth+0.005;
@@ -165,6 +171,40 @@ public class AnimGLEventListener4 extends AnimListener {
             if(currentTime - gameStartTime > gameDuration && !list.isEmpty()){
               gameOver = true;
             }
+            if(level1 || level2 || level3) {
+                // the basic of powerHealth
+                PowerHealth(gl, 0.7, 0.9, 0.33, 0.06, 29);
+                // the green of powerHealth
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 30);
+                // the yellow of powerHealth
+                if (powerHealth < 0.5 && powerHealth > 0.2) {
+                    PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 31);
+                }
+                // the red of powerHealth
+                if (powerHealth < 0.7 && powerHealth > 0.5) {
+                    PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 32);
+                }
+            }
+            if(heart1){
+                PowerHealth(gl , 0.0079,0.9,0.05,0.05,33);}
+            if(heart2){
+                PowerHealth(gl , 0.15,0.9,0.05,0.05,33);}
+            if(heart3){
+                PowerHealth(gl , 0.3,0.9,0.05,0.05,33);}
+
+            if (powerHealth > 0.62) {
+                if (level1) {
+                    heart3 = false;
+                    level1 = false;
+                } else if (level2) {
+                    heart2 = false;
+                    level2 = false;
+                } else if (level3) {
+                    heart1 = false;
+                    level3 = false;
+                }
+                powerHealth = 0;
+            }
         }
             else {
                 drawGameOver(gl);
@@ -179,17 +219,6 @@ public class AnimGLEventListener4 extends AnimListener {
             } else {
                 blood.isVisible = false;
             }
-        }
-
-        // the basic of powerHealth
-        PowerHealth(gl , 0.7,0.85,0.13,29);
-        // the green of powerHealth
-        PowerHealth(gl , 0.7+powerHealth,0.85,0.12,30);
-        if(powerHealth < 0.5 && powerHealth >0.2) {
-            PowerHealth(gl , 0.7+powerHealth,0.85,0.12,31);
-        }
-        if(powerHealth < 0.7 && powerHealth >0.5) {
-            PowerHealth(gl , 0.7+powerHealth,0.85,0.12,32);
         }
 
     }
@@ -347,14 +376,14 @@ public class AnimGLEventListener4 extends AnimListener {
 
         gl.glDisable(GL.GL_BLEND);
     }
-    public void PowerHealth(GL gl,double tx , double ty,double scale , int picture_index){
+    public void PowerHealth(GL gl,double tx , double ty,double scaleX ,double scaleY, int picture_index){
         gl.glEnable(GL.GL_BLEND);
         gl.glBindTexture(GL.GL_TEXTURE_2D, textures[picture_index]);
         // Turn Blending On
 
         gl.glPushMatrix();
         gl.glTranslated(tx,ty,0);
-        gl.glScaled(scale+0.2,scale-0.05,1);
+        gl.glScaled(scaleX,scaleY,1);
         gl.glBegin(GL.GL_QUADS);
         // Front Face
         gl.glTexCoord2f(0.0f, 0.0f);
