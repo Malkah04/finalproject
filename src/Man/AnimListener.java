@@ -12,7 +12,7 @@ public abstract class AnimListener implements GLEventListener, KeyListener, Mous
 //    protected  String assetsFolderName="C:\\Users\\DELL\\IdeaProjects\\Final\\game\\src\\sounds";
 
 //     protected  String assetsFolderName="C:\\finalGraphic\\src\\sounds";
-     protected  String assetsFolderName="C:\\Users\\DELL\\IdeaProjects\\player\\finalproject\\src\\sounds";
+     protected  String assetsFolderName="C:\\Users\\c2d\\IdeaProjects\\finalproject\\src\\sounds";
 
 //    protected  String assetsFolderName="C:\\graphicFinal\\src\\sounds";
 }
