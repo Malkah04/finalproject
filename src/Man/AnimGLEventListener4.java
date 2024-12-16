@@ -851,6 +851,7 @@ public class AnimGLEventListener4 extends AnimListener {
 
 
         }else  if(screen ==1){
+
             if(e.getX()>236&&e.getX()<418&&e.getY()>205&&e.getY()<274){
                 screen=2;
 
