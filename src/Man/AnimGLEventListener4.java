@@ -28,8 +28,9 @@ public class AnimGLEventListener4 extends AnimListener {
     private int targetY;
     private boolean isMoving = false;
     int animationIndex = 0, animationIndex2 = 0;
-    int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
-    boolean mult=false;
+    //    int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
+    int x2=1 , y2=0;
+    boolean mult=true;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
@@ -38,16 +39,25 @@ public class AnimGLEventListener4 extends AnimListener {
     long gameStartTime;
     int initialTime = 60;
     double powerHealth = 0;
+    double powerHealth2 = 0;
+    double t = 1;
     int numIndex1 = 0;
     int numIndex2 = 0;
     int score;
     boolean heart1 =true;
     boolean heart2 =true;
     boolean heart3 =true;
-    boolean level = true;
+    boolean Heart1 =true;
+    boolean Heart2 =true;
+    boolean Heart3 =true;
+    boolean level = false;
     boolean level1 =true;
     boolean level2 = true;
     boolean level3 = true;
+    boolean Level = false;
+    boolean Level1 =true;
+    boolean Level2 = true;
+    boolean Level3 = true;
 
     String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
@@ -127,6 +137,7 @@ public class AnimGLEventListener4 extends AnimListener {
     long startTime = System.currentTimeMillis();
 
     boolean isCollided = false;
+    boolean isCollided2 = false;
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
@@ -138,49 +149,88 @@ public class AnimGLEventListener4 extends AnimListener {
             SoundEf(5);
             return;
         }
-        if(gameOver){
-            drawGameOver(gl);
-            playMusic(4);
-            return;
-        }
+        if(!gameOver && level3 || !gameOver && Level3){
+            if(level) {
+                DrawSprite(gl, x, y, 28, 1.0f, Directions.up);
+                t = t - 0.1;
+                powerHealth = 0;
+                if (t < 0) {
+                    t = 1;
+                    level = false;
+                }
+            }else {
+                handleKeyPress();
+                animationIndex = animationIndex % 4;
+                animationIndex2 = animationIndex2 % 4;
+                DrawSprite(gl,x,y,animationIndex,1, direction1);
+            }
+            DrawSprite(gl,0,90,17,0.3f,Directions.up);
+            if(mult) {
+                if(Level) {
+                    DrawSprite(gl, x2, y2, 28, 1.0f, Directions.up);
+                    t=t-0.1;
+                    powerHealth2=0;
+                    if(t < 0){
+                        Level= false;
+                        t=1;
+                    }
+                }else {
+                    DrawSprite(gl, x2, y2, animationIndex2, 1, direction2);
+                }
+                Health2(gl);
+            }
+            long currentTime=System.currentTimeMillis();
+            if (currentTime-changeLag>=200){
+                zombieIndex=(int)(Math.random()*4)+5;
+            }
+            if(cnt<10) {
+                if (currentTime - startTime >= 4000) {
+                    int rx = (int) (Math.random() * maxWidth) -maxHeight-10;
+                    int ry = (int) (Math.random() * maxHeight) -maxHeight-10;
+                    list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
+                    startTime = currentTime;
+                    cnt++;
+                }
+            }
+            for (monstor m : list) {
+                moveMonster(m,list);
+                DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
+                double dist = sqrdDistance(x,y,m.x,m.y);
+                double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
+                isCollided = dist<=90;
+                System.out.println(isCollided + ", "+ dist + ", "+ radii);
+                if(isCollided){
+                    powerHealth = powerHealth+0.005;
+                    isCollided=false;
+                }
+                if(mult){
+                    double dist2 = sqrdDistance(x2,y2,m.x,m.y);
+                    double radii2 = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
+                    isCollided2 = dist2<=90;
+                    System.out.println(isCollided2 + ", "+ dist2 + ", "+ radii2);
+                    if(isCollided2){
+                        powerHealth2 = powerHealth2+0.005;
+                        isCollided2=false;
+                    }
+                }
+            }
+            if (!Level3){
+                mult=false;
+                x2 = -10000;
+                y2 = -10000;
+            }
+            if(!mult){
+                Level3 = false;
+            }
 
-        drawScore(gl);
-        displayNumbers(gl);
-        DrawSprite(gl,0,90,17,0.3f,Directions.up);
-        handleKeyPress();
+            drawScore(gl);
+            displayNumbers(gl);
+
 //        handleMouse();
-        animationIndex = animationIndex % 4;
-        animationIndex2 = animationIndex2 % 4;
-        DrawSprite(gl,x,y,animationIndex,1, direction1);
-        if(mult)
-         DrawSprite(gl,x2,y2,animationIndex2,1,direction2);
-        long currentTime=System.currentTimeMillis();
-        if (currentTime-changeLag>=200){
-            zombieIndex=(int)(Math.random()*4)+5;
-        }
-        if(cnt<10) {
-            if (currentTime - startTime >= 4000) {
-                int rx = (int) (Math.random() * maxWidth) -maxHeight-10;
-                int ry = (int) (Math.random() * maxHeight) -maxHeight-10;
-                list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
-                startTime = currentTime;
-                cnt++;
-            }
-        }
-        for (monstor m : list) {
-            moveMonster(m,list);
-            DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
-            double dist = sqrdDistance(x,y,m.x,m.y);
-            double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-            isCollided = dist<=90;
-            System.out.println(isCollided + ", "+ dist + ", "+ radii);
-            if(isCollided){
-                powerHealth = powerHealth+0.005;
-                isCollided=false;
-            }
-        }
-        List<Bullet> bulletsToRemove = new ArrayList<>();
-        List<monstor> monstersToRemove = new ArrayList<>();
+            Health(gl);
+
+            List<Bullet> bulletsToRemove = new ArrayList<>();
+            List<monstor> monstersToRemove = new ArrayList<>();
             for (Bullet bullet : bullets) {
                 bullet.move();
                 DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
@@ -244,46 +294,17 @@ public class AnimGLEventListener4 extends AnimListener {
                 }
                 changeLag = currentTime;
             }
-             drawTimer(gl,initialTime);
+            drawTimer(gl,initialTime);
 
             if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
-              gameOver = true;
+                gameOver = true;
             }
-            if(level1 || level2 || level3) {
-                // the basic of powerHealth
-                PowerHealth(gl, 0.7, 0.9, 0.33, 0.06, 29);
-                // the green of powerHealth
-                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 30);
-                // the yellow of powerHealth
-                if (powerHealth < 0.5 && powerHealth > 0.2) {
-                    PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 31);
-                }
-                // the red of powerHealth
-                if (powerHealth < 0.7 && powerHealth > 0.5) {
-                    PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 32);
-                }
-            }
-            if(heart1){
-                PowerHealth(gl , 0.0079,0.9,0.05,0.05,33);}
-            if(heart2){
-                PowerHealth(gl , 0.15,0.9,0.05,0.05,33);}
-            if(heart3){
-                PowerHealth(gl , 0.3,0.9,0.05,0.05,33);}
-
-            if (powerHealth > 0.62) {
-                if (level1) {
-                    heart3 = false;
-                    level1 = false;
-                } else if (level2) {
-                    heart2 = false;
-                    level2 = false;
-                } else if (level3) {
-                    heart1 = false;
-                    level3 = false;
-                }
-                powerHealth = 0;
-            }
-
+        }
+        else {
+            drawGameOver(gl);
+            playMusic(4);
+            return;
+        }
 
 
 
@@ -338,104 +359,104 @@ public class AnimGLEventListener4 extends AnimListener {
         int dx=monster.x-x;
         int dy=monster.y-y;
         int sqrt=dx*dx+dy*dy;
-            if (sqrt < 100||sq<100) {
-                return;
-            }
-            for (monstor m : l) {
-                if (m != monster) {
-                    int dxx = m.x - monster.x;
-                    int dyy = m.y - monster.y;
-                    int sqr = dxx * dxx + dyy * dyy;
-                    if (sqr < 100) {
-                        if (monster.x > m.x) {
-                            monster.x++;
-                        } else {
-                            monster.x--;
-                        }
-                        if (monster.y > m.y) {
-                            monster.y++;
-                        } else {
-                            monster.y--;
-                        }
+        if (sqrt < 100||sq<100) {
+            return;
+        }
+        for (monstor m : l) {
+            if (m != monster) {
+                int dxx = m.x - monster.x;
+                int dyy = m.y - monster.y;
+                int sqr = dxx * dxx + dyy * dyy;
+                if (sqr < 100) {
+                    if (monster.x > m.x) {
+                        monster.x++;
+                    } else {
+                        monster.x--;
+                    }
+                    if (monster.y > m.y) {
+                        monster.y++;
+                    } else {
+                        monster.y--;
                     }
                 }
             }
+        }
 
 
-                if(sqrt<sq) {
-                    if (Math.abs(monster.y - y) < 2) {
-                        if (monster.x > x) {
-                            monster.dir = Directions.right;
-                            monster.x -= 1;
-                        } else if (monster.x < x) {
-                            monster.dir = Directions.left;
-                            monster.x += 1;
-                        }
-                    } else if (Math.abs(monster.x - x) < 2) {
-                        if (monster.y > y) {
-                            monster.dir = Directions.up;
-                            monster.y -= 1;
-                        } else if (monster.y < y) {
-                            monster.dir = Directions.down;
-                            monster.y += 1;
-                        }
-                    } else {
-                        if (monster.x > x && monster.y > y) {
-                            monster.dir = Directions.up_right;
-                            monster.x -= 1;
-                            monster.y -= 1;
-                        } else if (monster.x < x && monster.y > y) {
-                            monster.dir = Directions.up_left;
-                            monster.x += 1;
-                            monster.y -= 1;
-                        } else if (monster.x > x && monster.y < y) {
-                            monster.dir = Directions.down_right;
-                            monster.x -= 1;
-                            monster.y += 1;
-                        } else if (monster.x < x && monster.y < y) {
-                            monster.dir = Directions.down_left;
-                            monster.x += 1;
-                            monster.y += 1;
-                        }
-                    }
+        if(sqrt<sq) {
+            if (Math.abs(monster.y - y) < 2) {
+                if (monster.x > x) {
+                    monster.dir = Directions.right;
+                    monster.x -= 1;
+                } else if (monster.x < x) {
+                    monster.dir = Directions.left;
+                    monster.x += 1;
                 }
-                else{
-                    if (Math.abs(monster.y - y2) < 2) {
-                        if (monster.x > x2) {
-                            monster.dir = Directions.right;
-                            monster.x -= 1;
-                        } else if (monster.x < x2) {
-                            monster.dir = Directions.left;
-                            monster.x += 1;
-                        }
-                    } else if (Math.abs(monster.x - x2) < 2) {
-                        if (monster.y > y2) {
-                            monster.dir = Directions.up;
-                            monster.y -= 1;
-                        } else if (monster.y < y2) {
-                            monster.dir = Directions.down;
-                            monster.y += 1;
-                        }
-                    } else {
-                        if (monster.x > x2 && monster.y > y2) {
-                            monster.dir = Directions.up_right;
-                            monster.x -= 1;
-                            monster.y -= 1;
-                        } else if (monster.x < x2 && monster.y > y2) {
-                            monster.dir = Directions.up_left;
-                            monster.x += 1;
-                            monster.y -= 1;
-                        } else if (monster.x > x2 && monster.y < y2) {
-                            monster.dir = Directions.down_right;
-                            monster.x -= 1;
-                            monster.y += 1;
-                        } else if (monster.x < x2 && monster.y < y2) {
-                            monster.dir = Directions.down_left;
-                            monster.x += 1;
-                            monster.y += 1;
-                        }
-                    }
+            } else if (Math.abs(monster.x - x) < 2) {
+                if (monster.y > y) {
+                    monster.dir = Directions.up;
+                    monster.y -= 1;
+                } else if (monster.y < y) {
+                    monster.dir = Directions.down;
+                    monster.y += 1;
                 }
+            } else {
+                if (monster.x > x && monster.y > y) {
+                    monster.dir = Directions.up_right;
+                    monster.x -= 1;
+                    monster.y -= 1;
+                } else if (monster.x < x && monster.y > y) {
+                    monster.dir = Directions.up_left;
+                    monster.x += 1;
+                    monster.y -= 1;
+                } else if (monster.x > x && monster.y < y) {
+                    monster.dir = Directions.down_right;
+                    monster.x -= 1;
+                    monster.y += 1;
+                } else if (monster.x < x && monster.y < y) {
+                    monster.dir = Directions.down_left;
+                    monster.x += 1;
+                    monster.y += 1;
+                }
+            }
+        }
+        else{
+            if (Math.abs(monster.y - y2) < 2) {
+                if (monster.x > x2) {
+                    monster.dir = Directions.right;
+                    monster.x -= 1;
+                } else if (monster.x < x2) {
+                    monster.dir = Directions.left;
+                    monster.x += 1;
+                }
+            } else if (Math.abs(monster.x - x2) < 2) {
+                if (monster.y > y2) {
+                    monster.dir = Directions.up;
+                    monster.y -= 1;
+                } else if (monster.y < y2) {
+                    monster.dir = Directions.down;
+                    monster.y += 1;
+                }
+            } else {
+                if (monster.x > x2 && monster.y > y2) {
+                    monster.dir = Directions.up_right;
+                    monster.x -= 1;
+                    monster.y -= 1;
+                } else if (monster.x < x2 && monster.y > y2) {
+                    monster.dir = Directions.up_left;
+                    monster.x += 1;
+                    monster.y -= 1;
+                } else if (monster.x > x2 && monster.y < y2) {
+                    monster.dir = Directions.down_right;
+                    monster.x -= 1;
+                    monster.y += 1;
+                } else if (monster.x < x2 && monster.y < y2) {
+                    monster.dir = Directions.down_left;
+                    monster.x += 1;
+                    monster.y += 1;
+                }
+            }
+        }
     }
 
 
@@ -570,6 +591,80 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glDisable(GL.GL_BLEND);
     }
 
+    public void Health(GL gl){
+        if(level1 || level2 || level3) {
+            // the basic of powerHealth
+            PowerHealth(gl, 0.7, 0.9, 0.33, 0.04, 29);
+            // the green of powerHealth
+            PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.03, 30);
+            // the yellow of powerHealth
+            if (powerHealth < 0.5 && powerHealth > 0.2) {
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.03, 31);
+            }
+            // the red of powerHealth
+            if (powerHealth < 0.7 && powerHealth > 0.5) {
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.03, 32);
+            }
+        }
+        if(heart1){
+            PowerHealth(gl , 0.0079,0.9,0.04,0.04,33);}
+        if(heart2){
+            PowerHealth(gl , 0.15,0.9,0.04,0.04,33);}
+        if(heart3){
+            PowerHealth(gl , 0.3,0.9,0.04,0.04,33);}
+
+        if (powerHealth > 0.62) {
+            if (level1) {
+                heart3 = false;
+                level1 = false;
+            } else if (level2) {
+                heart2 = false;
+                level2 = false;
+            } else if (level3) {
+                heart1 = false;
+                level3 = false;
+            }
+            powerHealth = 0;
+            level = true;
+        }
+    }
+    public void Health2(GL gl){
+        if(Level1 || Level2 || Level3) {
+            // the basic of powerHealth
+            PowerHealth(gl, 0.7, 0.8, 0.33, 0.04, 29);
+            // the green of powerHealth
+            PowerHealth(gl, 0.7 + powerHealth2, 0.8, 0.32, 0.03, 30);
+            // the yellow of powerHealth
+            if (powerHealth2 < 0.5 && powerHealth2 > 0.2) {
+                PowerHealth(gl, 0.7 + powerHealth2, 0.8, 0.32, 0.03, 31);
+            }
+            // the red of powerHealth
+            if (powerHealth2 < 0.7 && powerHealth2 > 0.5) {
+                PowerHealth(gl, 0.7 + powerHealth2, 0.8, 0.32, 0.03, 32);
+            }
+        }
+        if(Heart1){
+            PowerHealth(gl , 0.0079,0.8,0.04,0.04,33);}
+        if(Heart2){
+            PowerHealth(gl , 0.15,0.8,0.04,0.04,33);}
+        if(Heart3){
+            PowerHealth(gl , 0.3,0.8,0.04,0.04,33);}
+
+        if (powerHealth2 > 0.62) {
+            if (Level1) {
+                Heart3 = false;
+                Level1 = false;
+            } else if (Level2) {
+                Heart2 = false;
+                Level2 = false;
+            } else if (Level3) {
+                Heart1 = false;
+                Level3 = false;
+            }
+            powerHealth2 = 0;
+            Level = true;
+        }
+    }
     public void handleKeyPress() {
         boolean move=false;
         if (isKeyPressed(KeyEvent.VK_LEFT) && isKeyPressed(KeyEvent.VK_DOWN)) {
@@ -773,7 +868,7 @@ public class AnimGLEventListener4 extends AnimListener {
     }
 
     public void mouseDragged(MouseEvent e) {
-       mouseMoved(e);
+        mouseMoved(e);
     }
 
 
