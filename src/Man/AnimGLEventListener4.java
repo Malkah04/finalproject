@@ -31,8 +31,9 @@ public class AnimGLEventListener4 extends AnimListener {
     private int targetY;
     private boolean isMoving = false;
     int animationIndex = 0, animationIndex2 = 0;
-    int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
-    boolean mult=false;
+//    int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
+    int x2=1 ,y2=0;
+    boolean mult=true;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
@@ -41,16 +42,26 @@ public class AnimGLEventListener4 extends AnimListener {
     long gameStartTime;
     int initialTime = 60;
     double powerHealth = 0;
+    double powerHealth2 = 0;
     int numIndex1 = 0;
     int numIndex2 = 0;
     int score;
     boolean heart1 =true;
     boolean heart2 =true;
     boolean heart3 =true;
-    boolean level = true;
+    boolean level = false;
     boolean level1 =true;
     boolean level2 = true;
     boolean level3 = true;
+    boolean Heart1 =true;
+    boolean Heart2 =true;
+    boolean Heart3 =true;
+    boolean Level = false;
+    boolean Level1 =true;
+    boolean Level2 = true;
+    boolean Level3 = true;
+    double t=1;
+    double t2=1;
 
     String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
@@ -130,6 +141,7 @@ public class AnimGLEventListener4 extends AnimListener {
     long startTime = System.currentTimeMillis();
 
     boolean isCollided = false;
+    boolean isCollided2 = false;
     int screen =0;
 
     public void display(GLAutoDrawable gld) {
@@ -216,13 +228,37 @@ public class AnimGLEventListener4 extends AnimListener {
         drawScore(gl);
         displayNumbers(gl);
         DrawSprite(gl,0,90,17,0.3f,Directions.up);
-        handleKeyPress();
 //        handleMouse();
-        animationIndex = animationIndex % 4;
-        animationIndex2 = animationIndex2 % 4;
-        DrawSprite(gl,x,y,animationIndex,1, direction1);
-        if(mult)
-            DrawSprite(gl,x2,y2,animationIndex2,1,direction2);
+        handleKeyPress();
+        if(level) {
+            DrawSprite(gl, x, y, 28, 1.0f, Directions.up);
+            t = t - 0.1;
+            if (t < 0) {
+                powerHealth = 0;
+                level = false;
+                t = 1;
+            }
+        }else {
+                animationIndex = animationIndex % 4;
+                DrawSprite(gl,x,y,animationIndex,1, direction1);
+            }
+
+        if(mult) {
+            if(Level) {
+                DrawSprite(gl, x2, y2, 28, 1.0f, Directions.up);
+                t2=t2-0.1;
+                if(t2 < 0){
+                    powerHealth2=0;
+                    Level= false;
+                    t2=1;
+                }
+            }else {
+                animationIndex2 = animationIndex2 % 4;
+                DrawSprite(gl, x2, y2, animationIndex2, 1, direction2);
+            }
+            Health2(gl);
+        }
+        Health(gl);
         long currentTime=System.currentTimeMillis();
         if (currentTime-changeLag>=200){
             zombieIndex=(int)(Math.random()*4)+5;
@@ -247,6 +283,27 @@ public class AnimGLEventListener4 extends AnimListener {
                 powerHealth = powerHealth+0.005;
                 isCollided=false;
             }
+            if(mult){
+                double dist2 = sqrdDistance(x2,y2,m.x,m.y);
+                double radii2 = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
+                isCollided2 = dist2<=90;
+                System.out.println(isCollided2 + ", "+ dist2 + ", "+ radii2);
+                if(isCollided2){
+                    powerHealth2 = powerHealth2+0.005;
+                    isCollided2=false;
+                }
+            }
+        }
+        if (!Level3){
+            mult=false;
+            x2 = -10000;
+            y2 = -10000;
+        }
+        if(!mult){
+            Level3 = false;
+        }
+        if(!level3 && !Level3){
+            gameOver= true;
         }
         List<Bullet> bulletsToRemove = new ArrayList<>();
         List<monstor> monstersToRemove = new ArrayList<>();
@@ -326,44 +383,6 @@ public class AnimGLEventListener4 extends AnimListener {
         if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
             gameOver = true;
         }
-        if(level1 || level2 || level3) {
-            // the basic of powerHealth
-            PowerHealth(gl, 0.7, 0.9, 0.33, 0.06, 29);
-            // the green of powerHealth
-            PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 30);
-            // the yellow of powerHealth
-            if (powerHealth < 0.5 && powerHealth > 0.2) {
-                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 31);
-            }
-            // the red of powerHealth
-            if (powerHealth < 0.7 && powerHealth > 0.5) {
-                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 32);
-            }
-        }
-        if(heart1){
-            PowerHealth(gl , 0.0079,0.9,0.05,0.05,33);}
-        if(heart2){
-            PowerHealth(gl , 0.15,0.9,0.05,0.05,33);}
-        if(heart3){
-            PowerHealth(gl , 0.3,0.9,0.05,0.05,33);}
-
-        if (powerHealth > 0.62) {
-            if (level1) {
-                heart3 = false;
-                level1 = false;
-            } else if (level2) {
-                heart2 = false;
-                level2 = false;
-            } else if (level3) {
-                heart1 = false;
-                level3 = false;
-            }
-            powerHealth = 0;
-        }
-
-
-
-
         //apeare blood
         for (Blood blood : bloodList) {
             if (blood.isVisible && !blood.isExpired()) {
@@ -664,6 +683,80 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glPopMatrix();
 
         gl.glDisable(GL.GL_BLEND);
+    }
+    public void Health(GL gl){
+        if(level1 || level2 || level3) {
+            // the basic of powerHealth
+            PowerHealth(gl, 0.7, 0.9, 0.33, 0.04, 29);
+            // the green of powerHealth
+            PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.03, 30);
+            // the yellow of powerHealth
+            if (powerHealth < 0.5 && powerHealth > 0.2) {
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.03, 31);
+            }
+            // the red of powerHealth
+            if (powerHealth < 0.7 && powerHealth > 0.5) {
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.03, 32);
+            }
+        }
+        if(heart1){
+            PowerHealth(gl , 0.0079,0.9,0.04,0.04,33);}
+        if(heart2){
+            PowerHealth(gl , 0.15,0.9,0.04,0.04,33);}
+        if(heart3){
+            PowerHealth(gl , 0.3,0.9,0.04,0.04,33);}
+
+        if (powerHealth > 0.62) {
+            if (level1) {
+                heart3 = false;
+                level1 = false;
+            } else if (level2) {
+                heart2 = false;
+                level2 = false;
+            } else if (level3) {
+                heart1 = false;
+                level3 = false;
+            }
+            powerHealth = 0;
+            level = true;
+        }
+    }
+    public void Health2(GL gl){
+        if(Level1 || Level2 || Level3) {
+            // the basic of powerHealth
+            PowerHealth(gl, 0.7, 0.8, 0.33, 0.04, 29);
+            // the green of powerHealth
+            PowerHealth(gl, 0.7 + powerHealth2, 0.8, 0.32, 0.03, 30);
+            // the yellow of powerHealth
+            if (powerHealth2 < 0.5 && powerHealth2 > 0.2) {
+                PowerHealth(gl, 0.7 + powerHealth2, 0.8, 0.32, 0.03, 31);
+            }
+            // the red of powerHealth
+            if (powerHealth2 < 0.7 && powerHealth2 > 0.5) {
+                PowerHealth(gl, 0.7 + powerHealth2, 0.8, 0.32, 0.03, 32);
+            }
+        }
+        if(Heart1){
+            PowerHealth(gl , 0.0079,0.8,0.04,0.04,33);}
+        if(Heart2){
+            PowerHealth(gl , 0.15,0.8,0.04,0.04,33);}
+        if(Heart3){
+            PowerHealth(gl , 0.3,0.8,0.04,0.04,33);}
+
+        if (powerHealth2 > 0.62) {
+            if (Level1) {
+                Heart3 = false;
+                Level1 = false;
+            } else if (Level2) {
+                Heart2 = false;
+                Level2 = false;
+            } else if (Level3) {
+                Heart1 = false;
+                Level3 = false;
+            }
+            powerHealth2 = 0;
+            Level = true;
+        }
     }
 
     public void handleKeyPress() {
