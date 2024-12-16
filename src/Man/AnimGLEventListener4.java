@@ -20,20 +20,19 @@ import javax.media.opengl.glu.GLU;
 public class AnimGLEventListener4 extends AnimListener {
 
     public enum Directions{
-        up,right,left,down,up_left,up_right,down_left,down_right;
+        up,right,left,down,up_left,up_right,down_left,down_right
     }
 
     List<Bullet> bullets = new ArrayList<>();
     long lastBulletTime = System.currentTimeMillis();
     Directions direction=Directions.up;
-    int monsterIndex = 5;
     int animationIndex = 0;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
-    String textureNames[] ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullets 1.png", "background.jpg"};
-    TextureReader.Texture texture[] = new TextureReader.Texture[textureNames.length];
-    int textures[] = new int[textureNames.length];
+    String []textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png","sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png","zombie top 3.png","zombie top 4.png","bullets 1.png", "background.jpg"};
+    TextureReader.Texture []texture= new TextureReader.Texture[textureNames.length];
+    int []textures = new int[textureNames.length];
     public void init(GLAutoDrawable gld) {
         GL gl = gld.getGL();
         gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);    //This Will Clear The Background Color To Black
@@ -61,14 +60,14 @@ public class AnimGLEventListener4 extends AnimListener {
                 e.printStackTrace();
             }
 
-            int rand = (int) Math.random() * 10;
+
 
 
         }
     }
     public void shootBullet() {
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastBulletTime < 300) {
+        if (currentTime - lastBulletTime < 200) {
             return;
         }
 
@@ -110,23 +109,58 @@ public class AnimGLEventListener4 extends AnimListener {
             DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
         }
         List<Bullet> bulletsToRemove = new ArrayList<>();
+        List<monstor> monstersToRemove = new ArrayList<>();
+
         for (Bullet bullet : bullets) {
             bullet.move();
             DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-            if (bullet.x < 0 || bullet.x > maxWidth || bullet.y < 0 || bullet.y > maxHeight) {
+            if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
                 bulletsToRemove.add(bullet);
+                continue;
             }
-        //remove monstor
             for (monstor m : list) {
                 if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                    bulletsToRemove.add(bullet);
-                    list.remove(m);
-                    break;
+                    if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
+                        System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
+                        bulletsToRemove.add(bullet);
+                        monstersToRemove.add(m);
+                        break;
+                    } else {
+                        System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
+                    }
                 }
             }
         }
         bullets.removeAll(bulletsToRemove);
+        list.removeAll(monstersToRemove);
+
+
     }
+    public boolean isInDirection(Directions direction, float bulletX, float bulletY, float monsterX, float monsterY) {
+        switch (direction) {
+            case up:
+                return monsterY >= bulletY && Math.abs(monsterX - bulletX) <= 20;
+            case down:
+                return (monsterY <= bulletY && Math.abs(monsterX - bulletX) <= 20 && bulletY - monsterY <= 30);
+
+            case right:
+                return monsterX >= bulletX && Math.abs(monsterY - bulletY) <= 20;
+            case left:
+                return monsterX <= bulletX && Math.abs(monsterY - bulletY) <= 20;
+            case up_right:
+                return monsterX >= bulletX && monsterY >= bulletY;
+            case up_left:
+                return monsterX <= bulletX && monsterY >= bulletY;
+            case down_right:
+                return monsterX >= bulletX && monsterY <= bulletY;
+            case down_left:
+                return monsterX <= bulletX && monsterY <= bulletY;
+            default:
+                return false;
+        }
+
+    }
+
     public double sqrdDistance(int x, int y, int x1, int y1){
         return Math.pow(x-x1,2)+Math.pow(y-y1,2);
     }

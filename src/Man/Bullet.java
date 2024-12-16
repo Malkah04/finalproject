@@ -1,5 +1,5 @@
 package Man;
-
+import java.awt.*;
 class Bullet {
     int x, y;
     int textureIndex;
@@ -15,14 +15,14 @@ class Bullet {
 
     public void move() {
         switch (direction) {
-            case up: y += speed; break;
-            case down: y -= speed; break;
-            case left: x -= speed; break;
-            case right: x += speed; break;
-            case up_left: x -= speed; y += speed; break;
-            case up_right: x += speed; y += speed; break;
-            case down_left: x -= speed; y -= speed; break;
-            case down_right: x += speed; y -= speed; break;
+            case up: y += (int)speed; break;
+            case down: y -= (int)speed; break;
+            case left: x -=(int)speed; break;
+            case right: x += (int)speed; break;
+            case up_left: x -= (int)speed; y += (int)speed; break;
+            case up_right: x += (int)speed; y += (int)speed; break;
+            case down_left: x -= (int)speed; y -= (int)speed; break;
+            case down_right: x += (int)speed; y -= (int)speed; break;
         }
     }
 }

@@ -1,6 +1,7 @@
 package Man;
 
 import javax.media.opengl.GL;
+import java.awt.*;
 
 public class monstor {
     int x,y,index;
