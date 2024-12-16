@@ -87,7 +87,7 @@ public class AnimGLEventListener4 extends AnimListener {
                 e.printStackTrace();
             }
             if(!gameOver)playMusic(0);
-            else playMusic(4);
+
 
         }
         if(mult){
@@ -135,10 +135,12 @@ public class AnimGLEventListener4 extends AnimListener {
 
         if(numIndex1 == score/10){
             drawYouWin(gl);
+            SoundEf(5);
             return;
         }
         if(gameOver){
             drawGameOver(gl);
+            playMusic(4);
             return;
         }
 
@@ -158,8 +160,8 @@ public class AnimGLEventListener4 extends AnimListener {
         }
         if(cnt<10) {
             if (currentTime - startTime >= 4000) {
-                int rx = (int) (Math.random() * maxWidth) - maxWidth;
-                int ry = (int) (Math.random() * maxHeight) - maxHeight;
+                int rx = (int) (Math.random() * maxWidth) -maxHeight-10;
+                int ry = (int) (Math.random() * maxHeight) -maxHeight-10;
                 list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
                 startTime = currentTime;
                 cnt++;
@@ -184,17 +186,7 @@ public class AnimGLEventListener4 extends AnimListener {
                 DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
                 if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
                     bulletsToRemove.add(bullet);
-                    list.remove(m);
-                    if(numIndex2 < 9){
-                        numIndex2++;
-                    }
-                    else  { // if score = 20
-                        numIndex2 = 0;
-                        numIndex1 ++;
-                    }
-                    bloodList.add(new Blood(m.x, m.y));
                     break;
-
                 }
                 for (monstor m : list) {
                     if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
@@ -203,6 +195,13 @@ public class AnimGLEventListener4 extends AnimListener {
                             bulletsToRemove.add(bullet);
                             monstersToRemove.add(m);
                             list.remove(m);
+                            if(numIndex2 < 9){
+                                numIndex2++;
+                            }
+                            else  { // if score = 20
+                                numIndex2 = 0;
+                                numIndex1 ++;
+                            }
                             bloodList.add(new Blood(m.x, m.y));
                             break;
                         } else {
