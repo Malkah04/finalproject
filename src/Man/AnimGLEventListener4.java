@@ -55,7 +55,7 @@ public class AnimGLEventListener4 extends AnimListener {
             "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png"
             ,"6.png","7.png","8.png","9.png","Blood).png","RTS Status Indicator24.jpg","VIDA_8_0.png","VIDA_5.png","VIDA_3.png",
             "heart_3.png","Upper_S.png","Upper_C.png","Upper_Y.png","Upper_U.png","Upper_W.png",
-            "Upper_I.png","Upper_N.png", "background.jpg"};
+            "Upper_I.png","Upper_N.png","levels.png","home.png", "background.jpg"};
 
 
     TextureReader.Texture[] texture = new TextureReader.Texture[textureNames.length];
@@ -127,10 +127,76 @@ public class AnimGLEventListener4 extends AnimListener {
     long startTime = System.currentTimeMillis();
 
     boolean isCollided = false;
+    int screen =0;
+
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
+        switch (screen){
+            case 0:
+                drawHome(gld);
+                break;
+            case 1:
+                drawLevels(gld);
+                break;
+            case 2:
+                drawLevel1(gld);
+        }
+//        drawLevel1(gld);
+
+
+
+    }
+    public void drawHome(GLAutoDrawable gld){
+        GL gl = gld.getGL();
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[textures.length-2]);
+        // Turn Blending On
+
+        gl.glPushMatrix();
+        gl.glBegin(GL.GL_QUADS);
+        // Front Face
+        gl.glTexCoord2f(0.0f, 0.0f);
+        gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 0.0f);
+        gl.glVertex3f(1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 1.0f);
+        gl.glVertex3f(1.0f, 1.0f, -1.0f);
+        gl.glTexCoord2f(0.0f, 1.0f);
+        gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+        gl.glEnd();
+        gl.glPopMatrix();
+
+        gl.glDisable(GL.GL_BLEND);
+
+    }
+    public void drawLevels(GLAutoDrawable gld){
+        GL gl = gld.getGL();
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[textures.length-3]);
+        // Turn Blending On
+
+        gl.glPushMatrix();
+        gl.glBegin(GL.GL_QUADS);
+        // Front Face
+        gl.glTexCoord2f(0.0f, 0.0f);
+        gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 0.0f);
+        gl.glVertex3f(1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 1.0f);
+        gl.glVertex3f(1.0f, 1.0f, -1.0f);
+        gl.glTexCoord2f(0.0f, 1.0f);
+        gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+        gl.glEnd();
+        gl.glPopMatrix();
+
+        gl.glDisable(GL.GL_BLEND);
+    }
+    public void drawLevel1(GLAutoDrawable gld){
+        GL gl = gld.getGL();
         DrawBackground(gl);
 
         if(numIndex1 == score/10){
@@ -153,7 +219,7 @@ public class AnimGLEventListener4 extends AnimListener {
         animationIndex2 = animationIndex2 % 4;
         DrawSprite(gl,x,y,animationIndex,1, direction1);
         if(mult)
-         DrawSprite(gl,x2,y2,animationIndex2,1,direction2);
+            DrawSprite(gl,x2,y2,animationIndex2,1,direction2);
         long currentTime=System.currentTimeMillis();
         if (currentTime-changeLag>=200){
             zombieIndex=(int)(Math.random()*4)+5;
@@ -181,108 +247,108 @@ public class AnimGLEventListener4 extends AnimListener {
         }
         List<Bullet> bulletsToRemove = new ArrayList<>();
         List<monstor> monstersToRemove = new ArrayList<>();
-            for (Bullet bullet : bullets) {
-                bullet.move();
-                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                    bulletsToRemove.add(bullet);
-                    break;
-                }
-                for (monstor m : list) {
-                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                            bulletsToRemove.add(bullet);
-                            monstersToRemove.add(m);
-                            list.remove(m);
-                            if(numIndex2 < 9){
-                                numIndex2++;
-                            }
-                            else  { // if score = 20
-                                numIndex2 = 0;
-                                numIndex1 ++;
-                            }
-                            bloodList.add(new Blood(m.x, m.y));
-                            break;
-                        } else {
-                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
+        for (Bullet bullet : bullets) {
+            bullet.move();
+            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
+            if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
+                bulletsToRemove.add(bullet);
+                break;
+            }
+            for (monstor m : list) {
+                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
+                    if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
+                        System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
+                        bulletsToRemove.add(bullet);
+                        monstersToRemove.add(m);
+                        list.remove(m);
+                        if(numIndex2 < 9){
+                            numIndex2++;
                         }
+                        else  { // if score = 20
+                            numIndex2 = 0;
+                            numIndex1 ++;
+                        }
+                        bloodList.add(new Blood(m.x, m.y));
+                        break;
+                    } else {
+                        System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
                     }
                 }
             }
-            bullets.removeAll(bulletsToRemove);
-            list.removeAll(monstersToRemove);
+        }
+        bullets.removeAll(bulletsToRemove);
+        list.removeAll(monstersToRemove);
 //.....................
-            for (Bullet bullet : bullets2) {
-                bullet.move();
-                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                    bulletsToRemove.add(bullet);
-                }
-                for (monstor m : list) {
-                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                            bulletsToRemove.add(bullet);
-                            monstersToRemove.add(m);
-                            list.remove(m);
-                            bloodList.add(new Blood(m.x, m.y));
-                            break;
-                        } else {
-                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                        }
+        for (Bullet bullet : bullets2) {
+            bullet.move();
+            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
+            if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
+                bulletsToRemove.add(bullet);
+            }
+            for (monstor m : list) {
+                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
+                    if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
+                        System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
+                        bulletsToRemove.add(bullet);
+                        monstersToRemove.add(m);
+                        list.remove(m);
+                        bloodList.add(new Blood(m.x, m.y));
+                        break;
+                    } else {
+                        System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
                     }
                 }
             }
-            bullets2.removeAll(bulletsToRemove);
-            list.removeAll(monstersToRemove);
+        }
+        bullets2.removeAll(bulletsToRemove);
+        list.removeAll(monstersToRemove);
 
 //...................
-            if (currentTime - changeLag >= 1000) {
-                if (initialTime > 0) {
-                    initialTime--;
-                }
-                changeLag = currentTime;
+        if (currentTime - changeLag >= 1000) {
+            if (initialTime > 0) {
+                initialTime--;
             }
-             drawTimer(gl,initialTime);
+            changeLag = currentTime;
+        }
+        drawTimer(gl,initialTime);
 
-            if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
-              gameOver = true;
+        if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
+            gameOver = true;
+        }
+        if(level1 || level2 || level3) {
+            // the basic of powerHealth
+            PowerHealth(gl, 0.7, 0.9, 0.33, 0.06, 29);
+            // the green of powerHealth
+            PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 30);
+            // the yellow of powerHealth
+            if (powerHealth < 0.5 && powerHealth > 0.2) {
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 31);
             }
-            if(level1 || level2 || level3) {
-                // the basic of powerHealth
-                PowerHealth(gl, 0.7, 0.9, 0.33, 0.06, 29);
-                // the green of powerHealth
-                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 30);
-                // the yellow of powerHealth
-                if (powerHealth < 0.5 && powerHealth > 0.2) {
-                    PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 31);
-                }
-                // the red of powerHealth
-                if (powerHealth < 0.7 && powerHealth > 0.5) {
-                    PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 32);
-                }
+            // the red of powerHealth
+            if (powerHealth < 0.7 && powerHealth > 0.5) {
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 32);
             }
-            if(heart1){
-                PowerHealth(gl , 0.0079,0.9,0.05,0.05,33);}
-            if(heart2){
-                PowerHealth(gl , 0.15,0.9,0.05,0.05,33);}
-            if(heart3){
-                PowerHealth(gl , 0.3,0.9,0.05,0.05,33);}
+        }
+        if(heart1){
+            PowerHealth(gl , 0.0079,0.9,0.05,0.05,33);}
+        if(heart2){
+            PowerHealth(gl , 0.15,0.9,0.05,0.05,33);}
+        if(heart3){
+            PowerHealth(gl , 0.3,0.9,0.05,0.05,33);}
 
-            if (powerHealth > 0.62) {
-                if (level1) {
-                    heart3 = false;
-                    level1 = false;
-                } else if (level2) {
-                    heart2 = false;
-                    level2 = false;
-                } else if (level3) {
-                    heart1 = false;
-                    level3 = false;
-                }
-                powerHealth = 0;
+        if (powerHealth > 0.62) {
+            if (level1) {
+                heart3 = false;
+                level1 = false;
+            } else if (level2) {
+                heart2 = false;
+                level2 = false;
+            } else if (level3) {
+                heart1 = false;
+                level3 = false;
             }
+            powerHealth = 0;
+        }
 
 
 
@@ -295,7 +361,6 @@ public class AnimGLEventListener4 extends AnimListener {
                 blood.isVisible = false;
             }
         }
-
     }
     public boolean isInDirection(Directions direction, float bulletX, float bulletY, float monsterX, float monsterY) {
         switch (direction) {
@@ -476,9 +541,9 @@ public class AnimGLEventListener4 extends AnimListener {
         int tens = time / 10;
         int ones = time % 10;
 
-        DrawSprite(gl, 4, 90, textures.length - 23 + (tens-1), 0.3f, Directions.up);
+        DrawSprite(gl, 4, 90, textures.length - 23-2 + (tens-1), 0.3f, Directions.up);
 
-        DrawSprite(gl, 8, 90, textures.length - 23 + (ones-1), 0.3f, Directions.up);
+        DrawSprite(gl, 8, 90, textures.length - 23-2 + (ones-1), 0.3f, Directions.up);
 
     }
 
@@ -779,8 +844,25 @@ public class AnimGLEventListener4 extends AnimListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        shootBullet();
+        if(screen == 0){
 
+            if(e.getX()>243&&e.getX()<404&&e.getY()>149&&e.getY()<208){
+                screen=1;
+
+            }
+
+
+        }else  if(screen ==1){
+
+            if(e.getX()>236&&e.getX()<418&&e.getY()>205&&e.getY()<274){
+                screen=2;
+
+            }
+        }
+        else if(screen == 2){
+            shootBullet();
+        }
+        System.out.println(e.getX()+"   "+e.getY());
     }
 
     @Override

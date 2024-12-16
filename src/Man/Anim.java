@@ -9,7 +9,6 @@ public class Anim extends JFrame {
     public static void main(String[] args) {
         new Anim();
     }
-
     public Anim() {
         GLCanvas glcanvas;
         Animator animator;
