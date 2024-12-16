@@ -23,6 +23,9 @@ public class AnimGLEventListener4 extends AnimListener {
     long lastBulletTime2 = System.currentTimeMillis();
     Directions direction1 = Directions.up;
     Directions direction2 = Directions.up;
+    int zombieCount = 10;
+    int bulletcount=20;
+    boolean bulletcheck=true;
 
     private int targetX;
     private int targetY;
@@ -181,12 +184,18 @@ public class AnimGLEventListener4 extends AnimListener {
         }
         List<Bullet> bulletsToRemove = new ArrayList<>();
         List<monstor> monstersToRemove = new ArrayList<>();
+        if (bulletcount>0) {
             for (Bullet bullet : bullets) {
                 bullet.move();
                 DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
                 if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
                     bulletsToRemove.add(bullet);
-                    break;
+                    if (bulletcheck) {
+                        bulletcount--;
+                        if (bulletcount <= 0) {
+                            bulletcheck = false;
+                        }
+                    }
                 }
                 for (monstor m : list) {
                     if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
@@ -194,13 +203,14 @@ public class AnimGLEventListener4 extends AnimListener {
                             System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
                             bulletsToRemove.add(bullet);
                             monstersToRemove.add(m);
+                            zombieCount--;
+                            bulletcount--;
                             list.remove(m);
-                            if(numIndex2 < 9){
+                            if (numIndex2 < 9) {
                                 numIndex2++;
-                            }
-                            else  { // if score = 20
+                            } else { // if score = 20
                                 numIndex2 = 0;
-                                numIndex1 ++;
+                                numIndex1++;
                             }
                             bloodList.add(new Blood(m.x, m.y));
                             break;
@@ -212,6 +222,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
             bullets.removeAll(bulletsToRemove);
             list.removeAll(monstersToRemove);
+        }
 //.....................
             for (Bullet bullet : bullets2) {
                 bullet.move();
@@ -295,6 +306,11 @@ public class AnimGLEventListener4 extends AnimListener {
                 blood.isVisible = false;
             }
         }
+        DrawSprite(gl, 90, 0, 5, 0.5f, Directions.down);
+        DrawSprite(gl, 0, 0, 9, 0.8f, Directions.down);
+
+        drawZombieCount(gl, zombieCount);
+        drawbulletCount(gl,bulletcount);
 
     }
     public boolean isInDirection(Directions direction, float bulletX, float bulletY, float monsterX, float monsterY) {
@@ -471,6 +487,21 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glPopMatrix();
 
         gl.glDisable(GL.GL_BLEND);
+    }
+    public void drawZombieCount(GL gl, int zombieCount) {
+        int tens = zombieCount / 10;
+        int ones = zombieCount % 10;
+        DrawSprite(gl, 86, -1, textures.length - 23 + (ones - 1), 0.4f, Directions.up);
+        DrawSprite(gl, 82, -1, textures.length - 23 + (tens - 1), 0.4f, Directions.up);
+
+    }
+
+    public void drawbulletCount(GL gl, int zombieCount) {
+        int tens = zombieCount / 10;
+        int ones = zombieCount % 10;
+        DrawSprite(gl, 7, -1, textures.length - 23 + (ones - 1), 0.4f, Directions.up);
+        DrawSprite(gl, 3, -1, textures.length - 23 + (tens - 1), 0.4f, Directions.up);
+
     }
     public void drawTimer(GL gl, int time) {
         int tens = time / 10;
@@ -763,12 +794,34 @@ public class AnimGLEventListener4 extends AnimListener {
     }
 
 
+    int prevX=-1,prevY=0;
 
     public void mouseMoved(MouseEvent e) {
         targetX = (int) ((e.getX() / (double) maxWidth) * maxWidth);
         targetY = maxHeight - (int) ((e.getY() / (double) maxHeight) * maxHeight);
+        if (prevX==-1&&prevY==-1) {
+            prevX=targetX;
+            prevY=targetY;
+            return;
+        }
+        int dx=targetX-prevX;
+        int dy=targetY-prevY;
+        int sqrt=dx*dx+dy*dy;
+        if(sqrt>100) {
+            if(Math.abs(dx)>Math.abs(dy)) {
+                direction1=(dx>0)?Directions.right:Directions.left;
+            } else direction1=(dy>0)?Directions.up:Directions.down;
 
-        isMoving = true;
+            if (dx != 0 && dy != 0) {
+                if (dx>0&&dy>0)direction1=Directions.up_right;
+                if (dx>0&&dy<0)direction1=Directions.down_right;
+                if (dx<0&&dy>0)direction1=Directions.up_left;
+                if (dx<0&&dy<0)direction1=Directions.down_left;
+            }
+        }
+        prevX=targetX;
+        prevY=targetY;
+
 
     }
 
