@@ -128,6 +128,7 @@ public class AnimGLEventListener4 extends AnimListener {
 
     boolean isCollided = false;
     int screen =0;
+
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
