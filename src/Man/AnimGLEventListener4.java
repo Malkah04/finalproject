@@ -18,7 +18,9 @@ public class AnimGLEventListener4 extends AnimListener {
     }
 
     List<Bullet> bullets = new ArrayList<>();
+    List<Bullet> bullets2 = new ArrayList<>();
     long lastBulletTime = System.currentTimeMillis();
+    long lastBulletTime2 = System.currentTimeMillis();
     Directions direction1 = Directions.up;
     Directions direction2 = Directions.up;
 
@@ -89,11 +91,20 @@ public class AnimGLEventListener4 extends AnimListener {
         if (currentTime - lastBulletTime < 300) {
             return;
         }
-
         int bulletIndex = 9;
         bullets.add(new Bullet(x, y, bulletIndex, direction1));
         SoundEf(2);//ok
         lastBulletTime = currentTime;
+    }
+    public void shootBullet2() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastBulletTime2 < 200) {
+            return;
+        }
+
+        int bulletIndex = 9;
+        bullets2.add(new Bullet(x2, y2, bulletIndex, direction2));
+        lastBulletTime2 = currentTime;
     }
     voice vic=new voice();
 
@@ -146,25 +157,57 @@ public class AnimGLEventListener4 extends AnimListener {
             }
         }
         List<Bullet> bulletsToRemove = new ArrayList<>();
-        for (Bullet bullet : bullets) {
-            bullet.move();
-            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-            if (bullet.x < 0 || bullet.x > maxWidth || bullet.y < 0 || bullet.y > maxHeight) {
-                bulletsToRemove.add(bullet);
-            }
-            //remove monstor
-            for (monstor m : list) {
-                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
+        List<monstor> monstersToRemove = new ArrayList<>();
+            for (Bullet bullet : bullets) {
+                bullet.move();
+                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
+                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
                     bulletsToRemove.add(bullet);
-                    list.remove(m);
-                    bloodList.add(new Blood(m.x, m.y));
-                    break;
+
+                }
+                for (monstor m : list) {
+                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
+                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
+                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
+                            bulletsToRemove.add(bullet);
+                            monstersToRemove.add(m);
+                            list.remove(m);
+                            bloodList.add(new Blood(m.x, m.y));
+                            break;
+                        } else {
+                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
+                        }
+                    }
                 }
             }
-        }
-        bullets.removeAll(bulletsToRemove);
+            bullets.removeAll(bulletsToRemove);
+            list.removeAll(monstersToRemove);
+//.....................
+            for (Bullet bullet : bullets2) {
+                bullet.move();
+                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
+                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
+                    bulletsToRemove.add(bullet);
+                }
+                for (monstor m : list) {
+                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
+                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
+                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
+                            bulletsToRemove.add(bullet);
+                            monstersToRemove.add(m);
+                            list.remove(m);
+                            bloodList.add(new Blood(m.x, m.y));
+                            break;
+                        } else {
+                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
+                        }
+                    }
+                }
+            }
+            bullets2.removeAll(bulletsToRemove);
+            list.removeAll(monstersToRemove);
 
-
+//...................
             if (currentTime - changeLag >= 1000) {
                 if (initialTime > 0) {
                     initialTime--;
@@ -224,6 +267,30 @@ public class AnimGLEventListener4 extends AnimListener {
             } else {
                 blood.isVisible = false;
             }
+        }
+
+    }
+    public boolean isInDirection(Directions direction, float bulletX, float bulletY, float monsterX, float monsterY) {
+        switch (direction) {
+            case up:
+                return monsterY >= bulletY && Math.abs(monsterX - bulletX) <= 20;
+            case down:
+                return (monsterY <= bulletY && Math.abs(monsterX - bulletX) <= 20 && bulletY - monsterY <= 30);
+
+            case right:
+                return monsterX >= bulletX && Math.abs(monsterY - bulletY) <= 20;
+            case left:
+                return monsterX <= bulletX && Math.abs(monsterY - bulletY) <= 20;
+            case up_right:
+                return monsterX >= bulletX && monsterY >= bulletY;
+            case up_left:
+                return monsterX <= bulletX && monsterY >= bulletY;
+            case down_right:
+                return monsterX >= bulletX && monsterY <= bulletY;
+            case down_left:
+                return monsterX <= bulletX && monsterY <= bulletY;
+            default:
+                return false;
         }
 
     }
@@ -579,13 +646,7 @@ public class AnimGLEventListener4 extends AnimListener {
             direction2 = Directions.up;
             animationIndex2++;
         }
-
-        if (isKeyPressed(KeyEvent.VK_SPACE)) {
-            shootBullet();
-        }
-
         if(move)SoundEf(3); //ok
-
     }
     public void handleMouse(){
         if (isMoving) {
@@ -621,6 +682,9 @@ public class AnimGLEventListener4 extends AnimListener {
     public void keyPressed(final KeyEvent event) {
         int keyCode = event.getKeyCode();
         keyBits.set(keyCode);
+        if (keyCode == KeyEvent.VK_SPACE && mult) {
+            shootBullet2();
+        }
     }
 
     @Override
