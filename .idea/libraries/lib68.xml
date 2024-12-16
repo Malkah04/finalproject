@@ -1,9 +1,9 @@
 <component name="libraryTable">
-  <library name="lib642">
+  <library name="lib68">
     <CLASSES />
     <JAVADOC />
     <NATIVE>
-      <root url="file://$PROJECT_DIR$/../JOGLwin/lib64" />
+      <root url="file://D:/jogl/JOGLwin/lib64" />
     </NATIVE>
     <SOURCES />
   </library>

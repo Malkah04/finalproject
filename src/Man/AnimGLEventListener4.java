@@ -26,16 +26,15 @@ public class AnimGLEventListener4 extends AnimListener {
     private int targetY;
     private boolean isMoving = false;
     int animationIndex = 0, animationIndex2 = 0;
-//    Player player1,player2;
-    int x2,y2;
+    int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
     boolean mult=false;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
     boolean gameOver = false;
-    int gameDuration = 20000;
+    int gameDuration = 60000;
     long gameStartTime;
-    int initialTime = 20;
+    int initialTime = 60;
     double powerHealth = 0;
     boolean heart1 =true;
     boolean heart2 =true;
@@ -115,12 +114,12 @@ public class AnimGLEventListener4 extends AnimListener {
         if(!gameOver){
         DrawSprite(gl,2,90,17,0.5f,Directions.up);
         handleKeyPress();
-        handleMouse();
+//        handleMouse();
         animationIndex = animationIndex % 4;
         animationIndex2 = animationIndex2 % 4;
         DrawSprite(gl,x,y,animationIndex,1, direction1);
         if(mult)
-        DrawSprite(gl,x2,y2,animationIndex2,1,direction2);
+         DrawSprite(gl,x2,y2,animationIndex2,1,direction2);
         long currentTime=System.currentTimeMillis();
         if (currentTime-changeLag>=200){
             zombieIndex=(int)(Math.random()*4)+5;
@@ -239,67 +238,110 @@ public class AnimGLEventListener4 extends AnimListener {
     }
     public void moveMonster(monstor monster,List<monstor>l) {
         if(cnt<=10&&monster.x<=maxWidth&&monster.y<=maxHeight&&monster.x>=0&&monster.y>=0)SoundEf(1);
+        int xd=monster.x-x2;
+        int yd=monster.y-y2;
+        int sq=xd*xd+yd*yd;
         int dx=monster.x-x;
         int dy=monster.y-y;
         int sqrt=dx*dx+dy*dy;
-        if (sqrt<100) {
-            return;
-        }
-        for (monstor m : l) {
-            if(m!=monster) {
-                int dxx=m.x-monster.x;
-                int dyy=m.y-monster.y;
-                int sqr=dxx*dxx+dyy*dyy;
-                if (sqr<100) {
-                    if (monster.x>m.x) {
-                        monster.x++;
-                    } else {
-                        monster.x--;
-                    }
-                    if (monster.y>m.y) {
-                        monster.y++;
-                    } else {
-                        monster.y--;
+            if (sqrt < 100||sq<100) {
+                return;
+            }
+            for (monstor m : l) {
+                if (m != monster) {
+                    int dxx = m.x - monster.x;
+                    int dyy = m.y - monster.y;
+                    int sqr = dxx * dxx + dyy * dyy;
+                    if (sqr < 100) {
+                        if (monster.x > m.x) {
+                            monster.x++;
+                        } else {
+                            monster.x--;
+                        }
+                        if (monster.y > m.y) {
+                            monster.y++;
+                        } else {
+                            monster.y--;
+                        }
                     }
                 }
             }
-        }
 
-        if (Math.abs(monster.y - y) < 2) {
-            if (monster.x > x) {
-                monster.dir = Directions.right;
-                monster.x -= 1;
-            } else if (monster.x < x) {
-                monster.dir = Directions.left;
-                monster.x += 1;
-            }
-        } else if (Math.abs(monster.x - x) < 2) {
-            if (monster.y > y) {
-                monster.dir = Directions.up;
-                monster.y -= 1;
-            } else if (monster.y < y) {
-                monster.dir = Directions.down;
-                monster.y += 1;
-            }
-        } else {
-            if (monster.x > x && monster.y > y) {
-                monster.dir = Directions.up_right;
-                monster.x -= 1;
-                monster.y -= 1;
-            } else if (monster.x < x && monster.y > y) {
-                monster.dir = Directions.up_left;
-                monster.x += 1;
-                monster.y -= 1;
-            } else if (monster.x > x && monster.y < y) {
-                monster.dir = Directions.down_right;
-                monster.x -= 1;
-                monster.y += 1;
-            } else if (monster.x < x && monster.y < y) {
-                monster.dir = Directions.down_left;
-                monster.x += 1;
-                monster.y += 1;
-            }
-        }
+
+                if(sqrt<sq) {
+                    if (Math.abs(monster.y - y) < 2) {
+                        if (monster.x > x) {
+                            monster.dir = Directions.right;
+                            monster.x -= 1;
+                        } else if (monster.x < x) {
+                            monster.dir = Directions.left;
+                            monster.x += 1;
+                        }
+                    } else if (Math.abs(monster.x - x) < 2) {
+                        if (monster.y > y) {
+                            monster.dir = Directions.up;
+                            monster.y -= 1;
+                        } else if (monster.y < y) {
+                            monster.dir = Directions.down;
+                            monster.y += 1;
+                        }
+                    } else {
+                        if (monster.x > x && monster.y > y) {
+                            monster.dir = Directions.up_right;
+                            monster.x -= 1;
+                            monster.y -= 1;
+                        } else if (monster.x < x && monster.y > y) {
+                            monster.dir = Directions.up_left;
+                            monster.x += 1;
+                            monster.y -= 1;
+                        } else if (monster.x > x && monster.y < y) {
+                            monster.dir = Directions.down_right;
+                            monster.x -= 1;
+                            monster.y += 1;
+                        } else if (monster.x < x && monster.y < y) {
+                            monster.dir = Directions.down_left;
+                            monster.x += 1;
+                            monster.y += 1;
+                        }
+                    }
+                }
+                else{
+                    if (Math.abs(monster.y - y2) < 2) {
+                        if (monster.x > x2) {
+                            monster.dir = Directions.right;
+                            monster.x -= 1;
+                        } else if (monster.x < x2) {
+                            monster.dir = Directions.left;
+                            monster.x += 1;
+                        }
+                    } else if (Math.abs(monster.x - x2) < 2) {
+                        if (monster.y > y2) {
+                            monster.dir = Directions.up;
+                            monster.y -= 1;
+                        } else if (monster.y < y2) {
+                            monster.dir = Directions.down;
+                            monster.y += 1;
+                        }
+                    } else {
+                        if (monster.x > x2 && monster.y > y2) {
+                            monster.dir = Directions.up_right;
+                            monster.x -= 1;
+                            monster.y -= 1;
+                        } else if (monster.x < x2 && monster.y > y2) {
+                            monster.dir = Directions.up_left;
+                            monster.x += 1;
+                            monster.y -= 1;
+                        } else if (monster.x > x2 && monster.y < y2) {
+                            monster.dir = Directions.down_right;
+                            monster.x -= 1;
+                            monster.y += 1;
+                        } else if (monster.x < x2 && monster.y < y2) {
+                            monster.dir = Directions.down_left;
+                            monster.x += 1;
+                            monster.y += 1;
+                        }
+                    }
+                }
     }
 
 
@@ -340,9 +382,9 @@ public class AnimGLEventListener4 extends AnimListener {
         int tens = time / 10;
         int ones = time % 10;
 
-        DrawSprite(gl, 8, 90, textures.length - 11 + (tens-1), 0.5f, Directions.up);
+        DrawSprite(gl, 8, 90, textures.length - 16 + (tens-1), 0.5f, Directions.up);
 
-        DrawSprite(gl, 14, 90, textures.length - 11 + (ones-1), 0.5f, Directions.up);
+        DrawSprite(gl, 14, 90, textures.length - 16 + (ones-1), 0.5f, Directions.up);
 
     }
 
