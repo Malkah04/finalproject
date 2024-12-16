@@ -34,13 +34,10 @@ public class AnimGLEventListener4 extends AnimListener {
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
     boolean gameOver = false;
-    int gameDuration = 67000;
+    int gameDuration = 60000;
     long gameStartTime;
     int initialTime = 60;
     double powerHealth = 0;
-    int numIndex1 = 0;
-    int numIndex2 = 0;
-    int score;
     boolean heart1 =true;
     boolean heart2 =true;
     boolean heart3 =true;
@@ -52,10 +49,7 @@ public class AnimGLEventListener4 extends AnimListener {
     String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
             ,"zombie top 3.png","zombie top 4.png","bullets 1.png","Upper_G.png","Upper_A.png","Upper_M.png","Upper_E.png",
-            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png"
-            ,"6.png","7.png","8.png","9.png","Blood).png","RTS Status Indicator24.jpg","VIDA_8_0.png","VIDA_5.png","VIDA_3.png",
-            "heart_3.png","Upper_S.png","Upper_C.png","Upper_Y.png","Upper_U.png","Upper_W.png",
-            "Upper_I.png","Upper_N.png", "background.jpg"};
+            "Upper_O.png","Upper_V.png","Upper_R.png","Sand clock png.png","0.png","1.png","2.png","3.png","4.png","5.png","6.png","7.png","8.png","9.png","Blood).png","RTS Status Indicator24.jpg","VIDA_8_0.png","VIDA_5.png","VIDA_3.png","heart_3.png", "background.jpg"};
 
 
     TextureReader.Texture[] texture = new TextureReader.Texture[textureNames.length];
@@ -90,10 +84,6 @@ public class AnimGLEventListener4 extends AnimListener {
             else playMusic(4);
 
         }
-        if(mult){
-            score = 20;
-        } else score = 10;
-
         gameStartTime = System.currentTimeMillis();
     }
     public void shootBullet() {
@@ -132,19 +122,8 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
         DrawBackground(gl);
-
-        if(numIndex1 == score/10){
-            drawYouWin(gl);
-            return;
-        }
-        if(gameOver){
-            drawGameOver(gl);
-            return;
-        }
-
-        drawScore(gl);
-        displayNumbers(gl);
-        DrawSprite(gl,0,90,17,0.3f,Directions.up);
+        if(!gameOver){
+        DrawSprite(gl,2,90,17,0.5f,Directions.up);
         handleKeyPress();
 //        handleMouse();
         animationIndex = animationIndex % 4;
@@ -184,16 +163,6 @@ public class AnimGLEventListener4 extends AnimListener {
                 DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
                 if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
                     bulletsToRemove.add(bullet);
-                    list.remove(m);
-                    if(numIndex2 < 9){
-                        numIndex2++;
-                    }
-                    else  { // if score = 20
-                        numIndex2 = 0;
-                        numIndex1 ++;
-                    }
-                    bloodList.add(new Blood(m.x, m.y));
-                    break;
 
                 }
                 for (monstor m : list) {
@@ -247,7 +216,7 @@ public class AnimGLEventListener4 extends AnimListener {
             }
              drawTimer(gl,initialTime);
 
-            if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
+            if(currentTime - gameStartTime > gameDuration && !list.isEmpty()){
               gameOver = true;
             }
             if(level1 || level2 || level3) {
@@ -284,7 +253,10 @@ public class AnimGLEventListener4 extends AnimListener {
                 }
                 powerHealth = 0;
             }
-
+        }
+            else {
+                drawGameOver(gl);
+        }
 
 
 
@@ -477,9 +449,9 @@ public class AnimGLEventListener4 extends AnimListener {
         int tens = time / 10;
         int ones = time % 10;
 
-        DrawSprite(gl, 4, 90, textures.length - 23 + (tens-1), 0.3f, Directions.up);
+        DrawSprite(gl, 8, 90, textures.length - 16 + (tens-1), 0.5f, Directions.up);
 
-        DrawSprite(gl, 8, 90, textures.length - 23 + (ones-1), 0.3f, Directions.up);
+        DrawSprite(gl, 14, 90, textures.length - 16 + (ones-1), 0.5f, Directions.up);
 
     }
 
@@ -498,34 +470,6 @@ public class AnimGLEventListener4 extends AnimListener {
         SoundEf(4);
 
     }
-    public void displayNumbers(GL gl){
-        DrawSprite(gl,32,90,18+numIndex1,0.3f,Directions.up);
-        DrawSprite(gl,36,90,18+numIndex2,0.3f,Directions.up);
-    }
-    public void drawYouWin(GL gl){
-        int startX = 10;
-        int y = 50;
-        DrawSprite(gl,startX,y,36,1,Directions.up);
-        DrawSprite(gl,startX+10,y,14,1, Directions.up);
-        DrawSprite(gl,startX+20,y,37,1,Directions.up);
-
-        DrawSprite(gl,startX+40,y,38,1,Directions.up);
-        DrawSprite(gl,startX+50,y,39,0.8f,Directions.up);
-        DrawSprite(gl,startX+60,y,40,1,Directions.up);
-
-    }
-    public void drawScore(GL gl){
-        int startX = 15;
-        int y = 90;
-        DrawSprite(gl,startX,y,34,0.3f,Directions.up);
-        DrawSprite(gl,startX+3,y,35,0.3f, Directions.up);
-        DrawSprite(gl,startX+6,y,14,0.3f,Directions.up);
-        DrawSprite(gl,startX+9,y,16,0.3f,Directions.up);
-        DrawSprite(gl,startX+12,y,13,0.3f,Directions.up);
-
-    }
-
-
     public void DrawBackground(GL gl){
         gl.glEnable(GL.GL_BLEND);
         gl.glBindTexture(GL.GL_TEXTURE_2D, textures[textures.length-1]);
