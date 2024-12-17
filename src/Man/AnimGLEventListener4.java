@@ -23,7 +23,6 @@ public class AnimGLEventListener4 extends AnimListener {
     long lastBulletTime2 = System.currentTimeMillis();
     Directions direction1 = Directions.up;
     Directions direction2 = Directions.up;
-    int zombieCount = 10;
     int bulletcount=20;
     boolean bulletcheck=true;
 
@@ -31,9 +30,9 @@ public class AnimGLEventListener4 extends AnimListener {
     private int targetY;
     private boolean isMoving = false;
     int animationIndex = 0, animationIndex2 = 0;
-//    int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
-    int x2=1 ,y2=0;
-    boolean mult=true;
+    int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
+//    int x2=1 ,y2=0;
+    boolean mult=false;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
@@ -62,6 +61,8 @@ public class AnimGLEventListener4 extends AnimListener {
     boolean Level3 = true;
     double t=1;
     double t2=1;
+    int cnt=10;
+    int zombieCount = cnt;
 
     String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
@@ -105,8 +106,8 @@ public class AnimGLEventListener4 extends AnimListener {
 
         }
         if(mult){
-            score = 20;
-        } else score = 10;
+            score = cnt;
+        } else score = cnt;
 
         gameStartTime = System.currentTimeMillis();
     }
@@ -132,7 +133,6 @@ public class AnimGLEventListener4 extends AnimListener {
     }
     voice vic=new voice();
 
-    int cnt=0;
     List<monstor>list=new ArrayList<>();
     List<Blood> bloodList = new ArrayList<>();
 
@@ -159,45 +159,72 @@ public class AnimGLEventListener4 extends AnimListener {
                 drawLevel1(gld);
                 break;
             case 3:
-                try {
-                    drawLevel2(gld);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    drawLevel1(gld);
+                if (bulletcount <=20&&bulletcount>15) {
+                    cnt=15;
+                    zombieCount=cnt;
+                    timeForMons=3000;
+                    bulletcount = 25;
+                    bulletcheck = true;
                 }
+                System.out.println("cnt: " + cnt + ", zombie: " + zombieCount);
                 break;
             case 4:
-                try {
-                    drawLevel3(gld);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    drawLevel1(gld);
+                    if(bulletcount<=20&&bulletcount>18) {
+                        cnt=18;
+                        zombieCount=cnt;
+                        timeForMons=2000;
+                        bulletcount = 18;
+                        bulletcheck = true;
+                    }
+
                 break;
             case 5:
                 drawLevels(gld);
                 break;
             case 6:
-                try {
-                    drawMultiLevel1(gld);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(x2<-10&&y2<-10){
+                    x2=0;
+                    y2=0;
+                    mult=true;
+
                 }
+                drawLevel1(gld);
+
                 break;
             case 7:
-                try {
-                    drawMultiLevel2(gld);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(x2<-10&&y2<-10){
+                    x2=0;
+                    y2=0;
+                    mult=true;
                 }
+                if (bulletcount <=20&&bulletcount>15) {
+                    cnt=15;
+                    zombieCount=cnt;
+                    timeForMons=3000;
+                    bulletcount = 25;
+                    bulletcheck = true;
+                }
+                drawLevel1(gld);
                 break;
             case 8:
-                try {
-                    drawMultiLevel3(gld);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(x2<-10&&y2<-10){
+                    x2=0;
+                    y2=0;
+                    mult=true;
                 }
+                if(bulletcount<=20&&bulletcount>18) {
+                    cnt=18;
+                    zombieCount=cnt;
+                    timeForMons=2000;
+                    bulletcount = 18;
+                    bulletcheck = true;
+                }
+                drawLevel1(gld);
+
                 break;
         }
-//        drawLevel1(gld);
 
 
 
@@ -249,573 +276,15 @@ public class AnimGLEventListener4 extends AnimListener {
 
         gl.glDisable(GL.GL_BLEND);
     }
-    public void drawMultiLevel1(GLAutoDrawable gld) throws IOException{
-        GL gl = gld.getGL();
-        DrawBackground(gl);
-
-        if(numIndex1 == score/10){
-            drawYouWin(gl);
-            SoundEf(5);
-            return;
-        }
-        if(gameOver){
-            drawGameOver(gl);
-            playMusic(4);
-            return;
-        }
-
-        drawScore(gl);
-        displayNumbers(gl);
-        DrawSprite(gl,0,90,17,0.3f,Directions.up);
-//        handleMouse();
-        handleKeyPress();
-        if(level) {
-            DrawSprite(gl, x, y, 28, 1.0f, Directions.up);
-            t = t - 0.1;
-            if (t < 0) {
-                powerHealth = 0;
-                level = false;
-                t = 1;
-            }
-        }else {
-            animationIndex = animationIndex % 4;
-            DrawSprite(gl,x,y,animationIndex,1, direction1);
-        }
-
-        if(mult) {
-            if(Level) {
-                DrawSprite(gl, x2, y2, 28, 1.0f, Directions.up);
-                t2=t2-0.1;
-                if(t2 < 0){
-                    powerHealth2=0;
-                    Level= false;
-                    t2=1;
-                }
-            }else {
-                animationIndex2 = animationIndex2 % 4;
-                DrawSprite(gl, x2, y2, animationIndex2, 1, direction2);
-            }
-            Health2(gl);
-        }
-        Health(gl);
-        long currentTime=System.currentTimeMillis();
-        if (currentTime-changeLag>=200){
-            zombieIndex=(int)(Math.random()*4)+5;
-        }
-        if(cnt<10) {
-            if (currentTime - startTime >= 4000) {
-                int rx = (int) (Math.random() *2* maxWidth) -maxHeight;
-                int ry = (int) (Math.random() *2* maxHeight) -maxHeight;
-                list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
-                startTime = currentTime;
-                cnt++;
-            }
-        }
-        for (monstor m : list) {
-            moveMonster(m,list);
-            DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
-            double dist = sqrdDistance(x,y,m.x,m.y);
-            double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-            isCollided = dist<=90;
-            System.out.println(isCollided + ", "+ dist + ", "+ radii);
-            if(isCollided){
-                powerHealth = powerHealth+0.005;
-                isCollided=false;
-            }
-            if(mult){
-                double dist2 = sqrdDistance(x2,y2,m.x,m.y);
-                double radii2 = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-                isCollided2 = dist2<=90;
-                System.out.println(isCollided2 + ", "+ dist2 + ", "+ radii2);
-                if(isCollided2){
-                    powerHealth2 = powerHealth2+0.005;
-                    isCollided2=false;
-                }
-            }
-        }
-        if (!Level3){
-            mult=false;
-            x2 = -10000;
-            y2 = -10000;
-        }
-        if(!mult){
-            Level3 = false;
-        }
-        if(!level3 && !Level3){
-            gameOver= true;
-        }
-        List<Bullet> bulletsToRemove = new ArrayList<>();
-        List<monstor> monstersToRemove = new ArrayList<>();
-        if (bulletcount>0) {
-            for (Bullet bullet : bullets) {
-                bullet.move();
-                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                    bulletsToRemove.add(bullet);
-                    if (bulletcheck) {
-                        bulletcount--;
-                        if (bulletcount <= 0) {
-                            bulletcheck = false;
-                        }
-                    }
-                }
-                for (monstor m : list) {
-                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                            bulletsToRemove.add(bullet);
-                            monstersToRemove.add(m);
-                            zombieCount--;
-                            bulletcount--;
-                            list.remove(m);
-                            if (numIndex2 < 9) {
-                                numIndex2++;
-                            } else { // if score = 20
-                                numIndex2 = 0;
-                                numIndex1++;
-                            }
-                            bloodList.add(new Blood(m.x, m.y));
-                            break;
-                        } else {
-                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                        }
-                    }
-                }
-            }
-            bullets.removeAll(bulletsToRemove);
-            list.removeAll(monstersToRemove);
-        }
-//.....................
-        for (Bullet bullet : bullets2) {
-            bullet.move();
-            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-            if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                bulletsToRemove.add(bullet);
-            }
-            for (monstor m : list) {
-                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                    if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                        System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                        bulletsToRemove.add(bullet);
-                        monstersToRemove.add(m);
-                        list.remove(m);
-                        bloodList.add(new Blood(m.x, m.y));
-                        break;
-                    } else {
-                        System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                    }
-                }
-            }
-        }
-        bullets2.removeAll(bulletsToRemove);
-        list.removeAll(monstersToRemove);
-
-//...................
-        if (currentTime - changeLag >= 1000) {
-            if (initialTime > 0) {
-                initialTime--;
-            }
-            changeLag = currentTime;
-        }
-        drawTimer(gl,initialTime);
-
-        if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
-            gameOver = true;
-        }
-        //apeare blood
-        for (Blood blood : bloodList) {
-            if (blood.isVisible && !blood.isExpired()) {
-                DrawSprite(gl, blood.x, blood.y, 28, 1.0f, Directions.up);
-            } else {
-                blood.isVisible = false;
-            }
-        }
-        DrawSprite(gl, 90, 0, 5, 0.5f, Directions.down);
-        DrawSprite(gl, 0, 0, 9, 0.8f, Directions.down);
-
-        drawZombieCount(gl, zombieCount);
-        drawbulletCount(gl,bulletcount);
-    }
-    public void drawMultiLevel2(GLAutoDrawable gld) throws IOException{
-        GL gl = gld.getGL();
-        DrawBackground(gl);
-
-        if(numIndex1 == score/10){
-            drawYouWin(gl);
-            SoundEf(5);
-            return;
-        }
-        if(gameOver){
-            drawGameOver(gl);
-            playMusic(4);
-            return;
-        }
-
-        drawScore(gl);
-        displayNumbers(gl);
-        DrawSprite(gl,0,90,17,0.3f,Directions.up);
-//        handleMouse();
-        handleKeyPress();
-        if(level) {
-            DrawSprite(gl, x, y, 28, 1.0f, Directions.up);
-            t = t - 0.1;
-            if (t < 0) {
-                powerHealth = 0;
-                level = false;
-                t = 1;
-            }
-        }else {
-            animationIndex = animationIndex % 4;
-            DrawSprite(gl,x,y,animationIndex,1, direction1);
-        }
-
-        if(mult) {
-            if(Level) {
-                DrawSprite(gl, x2, y2, 28, 1.0f, Directions.up);
-                t2=t2-0.1;
-                if(t2 < 0){
-                    powerHealth2=0;
-                    Level= false;
-                    t2=1;
-                }
-            }else {
-                animationIndex2 = animationIndex2 % 4;
-                DrawSprite(gl, x2, y2, animationIndex2, 1, direction2);
-            }
-            Health2(gl);
-        }
-        Health(gl);
-        long currentTime=System.currentTimeMillis();
-        if (currentTime-changeLag>=200){
-            zombieIndex=(int)(Math.random()*4)+5;
-        }
-        if(cnt<10) {
-            if (currentTime - startTime >= 4000) {
-                int rx = (int) (Math.random() *2* maxWidth) -maxHeight;
-                int ry = (int) (Math.random() *2* maxHeight) -maxHeight;
-                list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
-                startTime = currentTime;
-                cnt++;
-            }
-        }
-        for (monstor m : list) {
-            moveMonster(m,list);
-            DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
-            double dist = sqrdDistance(x,y,m.x,m.y);
-            double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-            isCollided = dist<=90;
-            System.out.println(isCollided + ", "+ dist + ", "+ radii);
-            if(isCollided){
-                powerHealth = powerHealth+0.005;
-                isCollided=false;
-            }
-            if(mult){
-                double dist2 = sqrdDistance(x2,y2,m.x,m.y);
-                double radii2 = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-                isCollided2 = dist2<=90;
-                System.out.println(isCollided2 + ", "+ dist2 + ", "+ radii2);
-                if(isCollided2){
-                    powerHealth2 = powerHealth2+0.005;
-                    isCollided2=false;
-                }
-            }
-        }
-        if (!Level3){
-            mult=false;
-            x2 = -10000;
-            y2 = -10000;
-        }
-        if(!mult){
-            Level3 = false;
-        }
-        if(!level3 && !Level3){
-            gameOver= true;
-        }
-        List<Bullet> bulletsToRemove = new ArrayList<>();
-        List<monstor> monstersToRemove = new ArrayList<>();
-        if (bulletcount>0) {
-            for (Bullet bullet : bullets) {
-                bullet.move();
-                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                    bulletsToRemove.add(bullet);
-                    if (bulletcheck) {
-                        bulletcount--;
-                        if (bulletcount <= 0) {
-                            bulletcheck = false;
-                        }
-                    }
-                }
-                for (monstor m : list) {
-                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                            bulletsToRemove.add(bullet);
-                            monstersToRemove.add(m);
-                            zombieCount--;
-                            bulletcount--;
-                            list.remove(m);
-                            if (numIndex2 < 9) {
-                                numIndex2++;
-                            } else { // if score = 20
-                                numIndex2 = 0;
-                                numIndex1++;
-                            }
-                            bloodList.add(new Blood(m.x, m.y));
-                            break;
-                        } else {
-                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                        }
-                    }
-                }
-            }
-            bullets.removeAll(bulletsToRemove);
-            list.removeAll(monstersToRemove);
-        }
-//.....................
-        for (Bullet bullet : bullets2) {
-            bullet.move();
-            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-            if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                bulletsToRemove.add(bullet);
-            }
-            for (monstor m : list) {
-                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                    if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                        System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                        bulletsToRemove.add(bullet);
-                        monstersToRemove.add(m);
-                        list.remove(m);
-                        bloodList.add(new Blood(m.x, m.y));
-                        break;
-                    } else {
-                        System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                    }
-                }
-            }
-        }
-        bullets2.removeAll(bulletsToRemove);
-        list.removeAll(monstersToRemove);
-
-//...................
-        if (currentTime - changeLag >= 1000) {
-            if (initialTime > 0) {
-                initialTime--;
-            }
-            changeLag = currentTime;
-        }
-        drawTimer(gl,initialTime);
-
-        if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
-            gameOver = true;
-        }
-        //apeare blood
-        for (Blood blood : bloodList) {
-            if (blood.isVisible && !blood.isExpired()) {
-                DrawSprite(gl, blood.x, blood.y, 28, 1.0f, Directions.up);
-            } else {
-                blood.isVisible = false;
-            }
-        }
-        DrawSprite(gl, 90, 0, 5, 0.5f, Directions.down);
-        DrawSprite(gl, 0, 0, 9, 0.8f, Directions.down);
-
-        drawZombieCount(gl, zombieCount);
-        drawbulletCount(gl,bulletcount);
-    }
-    public void drawMultiLevel3(GLAutoDrawable gld) throws IOException{
-        GL gl = gld.getGL();
-        DrawBackground(gl);
-
-        if(numIndex1 == score/10){
-            drawYouWin(gl);
-            SoundEf(5);
-            return;
-        }
-        if(gameOver){
-            drawGameOver(gl);
-            playMusic(4);
-            return;
-        }
-
-        drawScore(gl);
-        displayNumbers(gl);
-        DrawSprite(gl,0,90,17,0.3f,Directions.up);
-//        handleMouse();
-        handleKeyPress();
-        if(level) {
-            DrawSprite(gl, x, y, 28, 1.0f, Directions.up);
-            t = t - 0.1;
-            if (t < 0) {
-                powerHealth = 0;
-                level = false;
-                t = 1;
-            }
-        }else {
-            animationIndex = animationIndex % 4;
-            DrawSprite(gl,x,y,animationIndex,1, direction1);
-        }
-
-        if(mult) {
-            if(Level) {
-                DrawSprite(gl, x2, y2, 28, 1.0f, Directions.up);
-                t2=t2-0.1;
-                if(t2 < 0){
-                    powerHealth2=0;
-                    Level= false;
-                    t2=1;
-                }
-            }else {
-                animationIndex2 = animationIndex2 % 4;
-                DrawSprite(gl, x2, y2, animationIndex2, 1, direction2);
-            }
-            Health2(gl);
-        }
-        Health(gl);
-        long currentTime=System.currentTimeMillis();
-        if (currentTime-changeLag>=200){
-            zombieIndex=(int)(Math.random()*4)+5;
-        }
-        if(cnt<10) {
-            if (currentTime - startTime >= 4000) {
-                int rx = (int) (Math.random() *2* maxWidth) -maxHeight;
-                int ry = (int) (Math.random() *2* maxHeight) -maxHeight;
-                list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
-                startTime = currentTime;
-                cnt++;
-            }
-        }
-        for (monstor m : list) {
-            moveMonster(m,list);
-            DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
-            double dist = sqrdDistance(x,y,m.x,m.y);
-            double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-            isCollided = dist<=90;
-            System.out.println(isCollided + ", "+ dist + ", "+ radii);
-            if(isCollided){
-                powerHealth = powerHealth+0.005;
-                isCollided=false;
-            }
-            if(mult){
-                double dist2 = sqrdDistance(x2,y2,m.x,m.y);
-                double radii2 = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-                isCollided2 = dist2<=90;
-                System.out.println(isCollided2 + ", "+ dist2 + ", "+ radii2);
-                if(isCollided2){
-                    powerHealth2 = powerHealth2+0.005;
-                    isCollided2=false;
-                }
-            }
-        }
-        if (!Level3){
-            mult=false;
-            x2 = -10000;
-            y2 = -10000;
-        }
-        if(!mult){
-            Level3 = false;
-        }
-        if(!level3 && !Level3){
-            gameOver= true;
-        }
-        List<Bullet> bulletsToRemove = new ArrayList<>();
-        List<monstor> monstersToRemove = new ArrayList<>();
-        if (bulletcount>0) {
-            for (Bullet bullet : bullets) {
-                bullet.move();
-                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                    bulletsToRemove.add(bullet);
-                    if (bulletcheck) {
-                        bulletcount--;
-                        if (bulletcount <= 0) {
-                            bulletcheck = false;
-                        }
-                    }
-                }
-                for (monstor m : list) {
-                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                            bulletsToRemove.add(bullet);
-                            monstersToRemove.add(m);
-                            zombieCount--;
-                            bulletcount--;
-                            list.remove(m);
-                            if (numIndex2 < 9) {
-                                numIndex2++;
-                            } else { // if score = 20
-                                numIndex2 = 0;
-                                numIndex1++;
-                            }
-                            bloodList.add(new Blood(m.x, m.y));
-                            break;
-                        } else {
-                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                        }
-                    }
-                }
-            }
-            bullets.removeAll(bulletsToRemove);
-            list.removeAll(monstersToRemove);
-        }
-//.....................
-        for (Bullet bullet : bullets2) {
-            bullet.move();
-            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-            if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                bulletsToRemove.add(bullet);
-            }
-            for (monstor m : list) {
-                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                    if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                        System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                        bulletsToRemove.add(bullet);
-                        monstersToRemove.add(m);
-                        list.remove(m);
-                        bloodList.add(new Blood(m.x, m.y));
-                        break;
-                    } else {
-                        System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                    }
-                }
-            }
-        }
-        bullets2.removeAll(bulletsToRemove);
-        list.removeAll(monstersToRemove);
-
-//...................
-        if (currentTime - changeLag >= 1000) {
-            if (initialTime > 0) {
-                initialTime--;
-            }
-            changeLag = currentTime;
-        }
-        drawTimer(gl,initialTime);
-
-        if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
-            gameOver = true;
-        }
-        //apeare blood
-        for (Blood blood : bloodList) {
-            if (blood.isVisible && !blood.isExpired()) {
-                DrawSprite(gl, blood.x, blood.y, 28, 1.0f, Directions.up);
-            } else {
-                blood.isVisible = false;
-            }
-        }
-        DrawSprite(gl, 90, 0, 5, 0.5f, Directions.down);
-        DrawSprite(gl, 0, 0, 9, 0.8f, Directions.down);
-
-        drawZombieCount(gl, zombieCount);
-        drawbulletCount(gl,bulletcount);
-    }
     //medium
-
+    boolean med=false;
+    int timeForMons=4000;
+    //easy
     public void drawLevel1(GLAutoDrawable gld){
         GL gl = gld.getGL();
         DrawBackground(gl);
-
+              med=true;
+//              if(med)score=7;
         if(numIndex1 == score/10){
             drawYouWin(gl);
             SoundEf(5);
@@ -865,388 +334,13 @@ public class AnimGLEventListener4 extends AnimListener {
         if (currentTime-changeLag>=200){
             zombieIndex=(int)(Math.random()*4)+5;
         }
-        if(cnt<10) {
-            if (currentTime - startTime >= 4000) {
+        if(cnt>=0) {
+            if (currentTime - startTime >= timeForMons) {
                 int rx = (int) (Math.random() *2* maxWidth) -maxHeight;
                 int ry = (int) (Math.random() *2* maxHeight) -maxHeight;
                 list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
                 startTime = currentTime;
-                cnt++;
-            }
-        }
-        for (monstor m : list) {
-            moveMonster(m,list);
-            DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
-            double dist = sqrdDistance(x,y,m.x,m.y);
-            double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-            isCollided = dist<=90;
-            System.out.println(isCollided + ", "+ dist + ", "+ radii);
-            if(isCollided){
-                powerHealth = powerHealth+0.005;
-                isCollided=false;
-            }
-            if(mult){
-                double dist2 = sqrdDistance(x2,y2,m.x,m.y);
-                double radii2 = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-                isCollided2 = dist2<=90;
-                System.out.println(isCollided2 + ", "+ dist2 + ", "+ radii2);
-                if(isCollided2){
-                    powerHealth2 = powerHealth2+0.005;
-                    isCollided2=false;
-                }
-            }
-        }
-        if (!Level3){
-            mult=false;
-            x2 = -10000;
-            y2 = -10000;
-        }
-        if(!mult){
-            Level3 = false;
-        }
-        if(!level3 && !Level3){
-            gameOver= true;
-        }
-        List<Bullet> bulletsToRemove = new ArrayList<>();
-        List<monstor> monstersToRemove = new ArrayList<>();
-        if (bulletcount>0) {
-            for (Bullet bullet : bullets) {
-                bullet.move();
-                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                    bulletsToRemove.add(bullet);
-                    if (bulletcheck) {
-                        bulletcount--;
-                        if (bulletcount <= 0) {
-                            bulletcheck = false;
-                        }
-                    }
-                }
-                for (monstor m : list) {
-                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                            bulletsToRemove.add(bullet);
-                            monstersToRemove.add(m);
-                            zombieCount--;
-                            bulletcount--;
-                            list.remove(m);
-                            if (numIndex2 < 9) {
-                                numIndex2++;
-                            } else { // if score = 20
-                                numIndex2 = 0;
-                                numIndex1++;
-                            }
-                            bloodList.add(new Blood(m.x, m.y));
-                            break;
-                        } else {
-                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                        }
-                    }
-                }
-            }
-            bullets.removeAll(bulletsToRemove);
-            list.removeAll(monstersToRemove);
-        }
-//.....................
-        for (Bullet bullet : bullets2) {
-            bullet.move();
-            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-            if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                bulletsToRemove.add(bullet);
-            }
-            for (monstor m : list) {
-                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                    if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                        System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                        bulletsToRemove.add(bullet);
-                        monstersToRemove.add(m);
-                        list.remove(m);
-                        bloodList.add(new Blood(m.x, m.y));
-                        break;
-                    } else {
-                        System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                    }
-                }
-            }
-        }
-        bullets2.removeAll(bulletsToRemove);
-        list.removeAll(monstersToRemove);
-
-//...................
-        if (currentTime - changeLag >= 1000) {
-            if (initialTime > 0) {
-                initialTime--;
-            }
-            changeLag = currentTime;
-        }
-        drawTimer(gl,initialTime);
-
-        if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
-            gameOver = true;
-        }
-        //apeare blood
-        for (Blood blood : bloodList) {
-            if (blood.isVisible && !blood.isExpired()) {
-                DrawSprite(gl, blood.x, blood.y, 28, 1.0f, Directions.up);
-            } else {
-                blood.isVisible = false;
-            }
-        }
-        DrawSprite(gl, 90, 0, 5, 0.5f, Directions.down);
-        DrawSprite(gl, 0, 0, 9, 0.8f, Directions.down);
-
-        drawZombieCount(gl, zombieCount);
-        drawbulletCount(gl,bulletcount);
-    }
-    public void drawLevel2(GLAutoDrawable gld) throws IOException {
-        GL gl = gld.getGL();
-        DrawBackground(gl);
-
-        if(numIndex1 == score/10){
-            drawYouWin(gl);
-            SoundEf(5);
-            return;
-        }
-        if(gameOver){
-            drawGameOver(gl);
-            playMusic(4);
-            return;
-        }
-
-        drawScore(gl);
-        displayNumbers(gl);
-        DrawSprite(gl,0,90,17,0.3f,Directions.up);
-//        handleMouse();
-        handleKeyPress();
-        if(level) {
-            DrawSprite(gl, x, y, 28, 1.0f, Directions.up);
-            t = t - 0.1;
-            if (t < 0) {
-                powerHealth = 0;
-                level = false;
-                t = 1;
-            }
-        }else {
-            animationIndex = animationIndex % 4;
-            DrawSprite(gl,x,y,animationIndex,1, direction1);
-        }
-
-        if(mult) {
-            if(Level) {
-                DrawSprite(gl, x2, y2, 28, 1.0f, Directions.up);
-                t2=t2-0.1;
-                if(t2 < 0){
-                    powerHealth2=0;
-                    Level= false;
-                    t2=1;
-                }
-            }else {
-                animationIndex2 = animationIndex2 % 4;
-                DrawSprite(gl, x2, y2, animationIndex2, 1, direction2);
-            }
-            Health2(gl);
-        }
-        Health(gl);
-        long currentTime=System.currentTimeMillis();
-        if (currentTime-changeLag>=200){
-            zombieIndex=(int)(Math.random()*4)+5;
-        }
-        if(cnt<10) {
-            if (currentTime - startTime >= 4000) {
-                int rx = (int) (Math.random() *2* maxWidth) -maxHeight;
-                int ry = (int) (Math.random() *2* maxHeight) -maxHeight;
-                list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
-                startTime = currentTime;
-                cnt++;
-            }
-        }
-        for (monstor m : list) {
-            moveMonster(m,list);
-            DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
-            double dist = sqrdDistance(x,y,m.x,m.y);
-            double radii = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-            isCollided = dist<=90;
-            System.out.println(isCollided + ", "+ dist + ", "+ radii);
-            if(isCollided){
-                powerHealth = powerHealth+0.005;
-                isCollided=false;
-            }
-            if(mult){
-                double dist2 = sqrdDistance(x2,y2,m.x,m.y);
-                double radii2 = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
-                isCollided2 = dist2<=90;
-                System.out.println(isCollided2 + ", "+ dist2 + ", "+ radii2);
-                if(isCollided2){
-                    powerHealth2 = powerHealth2+0.005;
-                    isCollided2=false;
-                }
-            }
-        }
-        if (!Level3){
-            mult=false;
-            x2 = -10000;
-            y2 = -10000;
-        }
-        if(!mult){
-            Level3 = false;
-        }
-        if(!level3 && !Level3){
-            gameOver= true;
-        }
-        List<Bullet> bulletsToRemove = new ArrayList<>();
-        List<monstor> monstersToRemove = new ArrayList<>();
-        if (bulletcount>0) {
-            for (Bullet bullet : bullets) {
-                bullet.move();
-                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                    bulletsToRemove.add(bullet);
-                    if (bulletcheck) {
-                        bulletcount--;
-                        if (bulletcount <= 0) {
-                            bulletcheck = false;
-                        }
-                    }
-                }
-                for (monstor m : list) {
-                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                            bulletsToRemove.add(bullet);
-                            monstersToRemove.add(m);
-                            zombieCount--;
-                            bulletcount--;
-                            list.remove(m);
-                            if (numIndex2 < 9) {
-                                numIndex2++;
-                            } else { // if score = 20
-                                numIndex2 = 0;
-                                numIndex1++;
-                            }
-                            bloodList.add(new Blood(m.x, m.y));
-                            break;
-                        } else {
-                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                        }
-                    }
-                }
-            }
-            bullets.removeAll(bulletsToRemove);
-            list.removeAll(monstersToRemove);
-        }
-//.....................
-        for (Bullet bullet : bullets2) {
-            bullet.move();
-            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-            if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                bulletsToRemove.add(bullet);
-            }
-            for (monstor m : list) {
-                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                    if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                        System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                        bulletsToRemove.add(bullet);
-                        monstersToRemove.add(m);
-                        list.remove(m);
-                        bloodList.add(new Blood(m.x, m.y));
-                        break;
-                    } else {
-                        System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                    }
-                }
-            }
-        }
-        bullets2.removeAll(bulletsToRemove);
-        list.removeAll(monstersToRemove);
-
-//...................
-        if (currentTime - changeLag >= 1000) {
-            if (initialTime > 0) {
-                initialTime--;
-            }
-            changeLag = currentTime;
-        }
-        drawTimer(gl,initialTime);
-
-        if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
-            gameOver = true;
-        }
-        //apeare blood
-        for (Blood blood : bloodList) {
-            if (blood.isVisible && !blood.isExpired()) {
-                DrawSprite(gl, blood.x, blood.y, 28, 1.0f, Directions.up);
-            } else {
-                blood.isVisible = false;
-            }
-        }
-        DrawSprite(gl, 90, 0, 5, 0.5f, Directions.down);
-        DrawSprite(gl, 0, 0, 9, 0.8f, Directions.down);
-
-        drawZombieCount(gl, zombieCount);
-        drawbulletCount(gl,bulletcount);
-    }
-    //hard
-    public void drawLevel3(GLAutoDrawable gld) throws IOException {
-        GL gl = gld.getGL();
-        DrawBackground(gl);
-
-        if(numIndex1 == score/10){
-            drawYouWin(gl);
-            SoundEf(5);
-            return;
-        }
-        if(gameOver){
-            drawGameOver(gl);
-            playMusic(4);
-            return;
-        }
-
-        drawScore(gl);
-        displayNumbers(gl);
-        DrawSprite(gl,0,90,17,0.3f,Directions.up);
-//        handleMouse();
-        handleKeyPress();
-        if(level) {
-            DrawSprite(gl, x, y, 28, 1.0f, Directions.up);
-            t = t - 0.1;
-            if (t < 0) {
-                powerHealth = 0;
-                level = false;
-                t = 1;
-            }
-        }else {
-            animationIndex = animationIndex % 4;
-            DrawSprite(gl,x,y,animationIndex,1, direction1);
-        }
-
-        if(mult) {
-            if(Level) {
-                DrawSprite(gl, x2, y2, 28, 1.0f, Directions.up);
-                t2=t2-0.1;
-                if(t2 < 0){
-                    powerHealth2=0;
-                    Level= false;
-                    t2=1;
-                }
-            }else {
-                animationIndex2 = animationIndex2 % 4;
-                DrawSprite(gl, x2, y2, animationIndex2, 1, direction2);
-            }
-            Health2(gl);
-        }
-        Health(gl);
-        long currentTime=System.currentTimeMillis();
-        if (currentTime-changeLag>=200){
-            zombieIndex=(int)(Math.random()*4)+5;
-        }
-        if(cnt<10) {
-            if (currentTime - startTime >= 4000) {
-                int rx = (int) (Math.random() *2* maxWidth) -maxHeight;
-                int ry = (int) (Math.random() *2* maxHeight) -maxHeight;
-                list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
-                startTime = currentTime;
-                cnt++;
+                cnt--;
             }
         }
         for (monstor m : list) {
@@ -1408,7 +502,7 @@ public class AnimGLEventListener4 extends AnimListener {
     public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
     }
     public void moveMonster(monstor monster,List<monstor>l) {
-        if(cnt<=10&&monster.x<=maxWidth&&monster.y<=maxHeight&&monster.x>=0&&monster.y>=0)SoundEf(1);
+        if(monster.x<=maxWidth&&monster.y<=maxHeight&&monster.x>=0&&monster.y>=0)SoundEf(1);
         int xd=monster.x-x2;
         int yd=monster.y-y2;
         int sq=xd*xd+yd*yd;
@@ -1869,36 +963,7 @@ public class AnimGLEventListener4 extends AnimListener {
         }
         if(move)SoundEf(3); //ok
     }
-    public void handleMouse(){
-        if (isMoving) {
-            int dx = targetX - x;
-            int dy = targetY - y;
-
-            if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
-                isMoving = false;
-            } else {
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    x += (dx > 0) ? 1 : -1;
-                    direction1 = (dx > 0) ? Directions.right : Directions.left;
-                } else {
-                    y += (dy > 0) ? 1 : -1;
-                    direction1 = (dy > 0) ? Directions.up : Directions.down;
-                }
-
-                if (dx != 0 && dy != 0) {
-                    if (dx > 0 && dy > 0) direction1 = Directions.up_right;
-                    if (dx > 0 && dy < 0) direction1= Directions.down_right;
-                    if (dx < 0 && dy > 0) direction1 = Directions.up_left;
-                    if (dx < 0 && dy < 0) direction1 = Directions.down_left;
-                }
-            }
-        }
-    }
-
-
-
     public BitSet keyBits = new BitSet(256);
-
     @Override
     public void keyPressed(final KeyEvent event) {
         int keyCode = event.getKeyCode();
@@ -1928,34 +993,7 @@ public class AnimGLEventListener4 extends AnimListener {
 
     }
 
-    int prevX=-1,prevY=0;
-
-
     public void mouseMoved(MouseEvent e) {
-        targetX = (int) ((e.getX() / (double) maxWidth) * maxWidth);
-        targetY = maxHeight - (int) ((e.getY() / (double) maxHeight) * maxHeight);
-        if (prevX==-1&&prevY==-1) {
-            prevX=targetX;
-            prevY=targetY;
-            return;
-        }
-        int dx=targetX-prevX;
-        int dy=targetY-prevY;
-        int sqrt=dx*dx+dy*dy;
-        if(sqrt>100) {
-            if(Math.abs(dx)>Math.abs(dy)) {
-                direction1=(dx>0)?Directions.right:Directions.left;
-            } else direction1=(dy>0)?Directions.up:Directions.down;
-
-            if (dx != 0 && dy != 0) {
-                if (dx>0&&dy>0)direction1=Directions.up_right;
-                if (dx>0&&dy<0)direction1=Directions.down_right;
-                if (dx<0&&dy>0)direction1=Directions.up_left;
-                if (dx<0&&dy<0)direction1=Directions.down_left;
-            }
-        }
-        prevX=targetX;
-        prevY=targetY;
 
 
     }
@@ -1991,7 +1029,12 @@ public class AnimGLEventListener4 extends AnimListener {
                 screen=4;
             }
         }
-        else if(screen == 2){
+        else if(screen == 2 ||screen==3||screen==4){
+            shootBullet();
+        }
+        else if(mult&(screen==6||screen==7||screen==8)){
+
+            shootBullet2();
             shootBullet();
         }
         else if(screen==5){
