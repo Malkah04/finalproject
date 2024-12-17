@@ -26,9 +26,7 @@ public class AnimGLEventListener4 extends AnimListener {
     int bulletcount=20;
     boolean bulletcheck=true;
 
-    private int targetX;
-    private int targetY;
-    private boolean isMoving = false;
+
     int animationIndex = 0, animationIndex2 = 0;
     int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
 //    int x2=1 ,y2=0;
@@ -225,9 +223,10 @@ public class AnimGLEventListener4 extends AnimListener {
 
                 break;
         }
-
-
-
+        long current = System.currentTimeMillis();
+        if(current - gameStartTime >= gameDuration && !list.isEmpty()) {
+            gameOver = true;
+        }
     }
     public void drawHome(GLAutoDrawable gld){
         GL gl = gld.getGL();
@@ -279,22 +278,25 @@ public class AnimGLEventListener4 extends AnimListener {
     //medium
     boolean med=false;
     int timeForMons=4000;
+    private boolean gameOverScreenDisplayed = false;
+
     //easy
     public void drawLevel1(GLAutoDrawable gld){
         GL gl = gld.getGL();
         DrawBackground(gl);
               med=true;
 //              if(med)score=7;
-        if(numIndex1 == score/10){
+        if(zombieCount==0){
             drawYouWin(gl);
             SoundEf(5);
             return;
         }
-        if(gameOver){
+        if(gameOver && !gameOverScreenDisplayed){
             drawGameOver(gl);
             playMusic(4);
             return;
         }
+
 
         drawScore(gl);
         displayNumbers(gl);
@@ -304,8 +306,8 @@ public class AnimGLEventListener4 extends AnimListener {
         if(level) {
             DrawSprite(gl, x, y, 28, 1.0f, Directions.up);
             t = t - 0.1;
+            powerHealth = 0;
             if (t < 0) {
-                powerHealth = 0;
                 level = false;
                 t = 1;
             }
@@ -318,8 +320,8 @@ public class AnimGLEventListener4 extends AnimListener {
             if(Level) {
                 DrawSprite(gl, x2, y2, 28, 1.0f, Directions.up);
                 t2=t2-0.1;
+                powerHealth2=0;
                 if(t2 < 0){
-                    powerHealth2=0;
                     Level= false;
                     t2=1;
                 }
@@ -343,6 +345,7 @@ public class AnimGLEventListener4 extends AnimListener {
                 cnt--;
             }
         }
+
         for (monstor m : list) {
             moveMonster(m,list);
             DrawSprite(gl, m.x, m.y, zombieIndex, 1, m.dir);
@@ -378,7 +381,8 @@ public class AnimGLEventListener4 extends AnimListener {
         }
         List<Bullet> bulletsToRemove = new ArrayList<>();
         List<monstor> monstersToRemove = new ArrayList<>();
-        if (bulletcount>0) {
+        if (bulletcount>0 && bulletcheck) {
+
             for (Bullet bullet : bullets) {
                 bullet.move();
                 DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
@@ -387,6 +391,7 @@ public class AnimGLEventListener4 extends AnimListener {
                     if (bulletcheck) {
                         bulletcount--;
                         if (bulletcount <= 0) {
+                            gameOver = true;
                             bulletcheck = false;
                         }
                     }
@@ -458,7 +463,8 @@ public class AnimGLEventListener4 extends AnimListener {
         for (Blood blood : bloodList) {
             if (blood.isVisible && !blood.isExpired()) {
                 DrawSprite(gl, blood.x, blood.y, 28, 1.0f, Directions.up);
-            } else {
+            }
+            else {
                 blood.isVisible = false;
             }
         }
@@ -1034,7 +1040,7 @@ public class AnimGLEventListener4 extends AnimListener {
         }
         else if(mult&(screen==6||screen==7||screen==8)){
 
-            shootBullet2();
+
             shootBullet();
         }
         else if(screen==5){
