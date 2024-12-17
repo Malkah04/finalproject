@@ -1,13 +1,18 @@
 package Man;
 import com.sun.opengl.util.*;
 import java.awt.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import javax.media.opengl.*;
 import javax.swing.*;
 
 public class Anim extends JFrame {
-
-    public static void main(String[] args) {
+    static Integer highScore = Constants.highScore;
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         new Anim();
+        highScore= (Integer) Cashes.get("highScore");
+        System.out.println(highScore);
     }
     public Anim() {
         GLCanvas glcanvas;
