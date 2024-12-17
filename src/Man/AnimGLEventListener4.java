@@ -141,7 +141,7 @@ public class AnimGLEventListener4 extends AnimListener {
     boolean isCollided = false;
     boolean isCollided2 = false;
     int screen =0;
-
+        boolean dn=false;
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
@@ -158,12 +158,13 @@ public class AnimGLEventListener4 extends AnimListener {
                 break;
             case 3:
                     drawLevel1(gld);
-                if (bulletcount <=20&&bulletcount>15) {
-                    cnt=15;
+                if (!dn&&bulletcount <=20&&bulletcount>18) {
+                    cnt=18;
                     zombieCount=cnt;
                     timeForMons=3000;
                     bulletcount = 25;
                     bulletcheck = true;
+                    dn=true;
                 }
                 System.out.println("cnt: " + cnt + ", zombie: " + zombieCount);
                 break;
@@ -275,17 +276,14 @@ public class AnimGLEventListener4 extends AnimListener {
 
         gl.glDisable(GL.GL_BLEND);
     }
-    //medium
-    boolean med=false;
+
     int timeForMons=4000;
     private boolean gameOverScreenDisplayed = false;
 
-    //easy
     public void drawLevel1(GLAutoDrawable gld){
         GL gl = gld.getGL();
         DrawBackground(gl);
-              med=true;
-//              if(med)score=7;
+
         if(zombieCount==0){
             drawYouWin(gl);
             SoundEf(5);
@@ -336,9 +334,9 @@ public class AnimGLEventListener4 extends AnimListener {
         if (currentTime-changeLag>=200){
             zombieIndex=(int)(Math.random()*4)+5;
         }
-        if(cnt>=0) {
+        if(cnt>0) {
             if (currentTime - startTime >= timeForMons) {
-                int rx = (int) (Math.random() *2* maxWidth) -maxHeight;
+                int rx = (int) (Math.random() *2* maxWidth) -maxWidth;
                 int ry = (int) (Math.random() *2* maxHeight) -maxHeight;
                 list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
                 startTime = currentTime;
