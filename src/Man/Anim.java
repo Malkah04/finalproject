@@ -1,10 +1,16 @@
 package Man;
 import com.sun.opengl.util.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.media.opengl.*;
 import javax.swing.*;
 
-public class Anim extends JFrame {
+public class Anim extends JFrame  implements ActionListener {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+    }
 
     public static void main(String[] args) {
         new Anim();
@@ -29,5 +35,40 @@ public class Anim extends JFrame {
         setVisible(true);
         setFocusable(true);
         glcanvas.requestFocus();
+
+
+        JMenuBar menuBar = new JMenuBar();
+
+
+        JMenu fileMenu = new JMenu("File");
+        JMenu Instructions = new JMenu("Instructions");
+        JMenu helpMenu = new JMenu("Help");
+
+
+        JMenuItem newItem = new JMenuItem("New");
+        JMenuItem openItem = new JMenuItem("Open");
+        JMenuItem exitItem = new JMenuItem("Exit");
+
+
+        exitItem.addActionListener(e -> System.exit(0)); // Exit application on click
+
+
+        fileMenu.add(newItem);
+        fileMenu.add(openItem);
+        fileMenu.addSeparator();
+        fileMenu.add(exitItem);
+
+
+        menuBar.add(fileMenu);
+        menuBar.add(Instructions);
+        menuBar.add(helpMenu);
+
+
+        this.setJMenuBar(menuBar);
+
+
+        this.setVisible(true);
+
+
     }
 }
