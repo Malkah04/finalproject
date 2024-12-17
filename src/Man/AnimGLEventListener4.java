@@ -24,13 +24,17 @@ public class AnimGLEventListener4 extends AnimListener {
     long lastBulletTime2 = System.currentTimeMillis();
     Directions direction1 = Directions.up;
     Directions direction2 = Directions.up;
+    int zombieCount = 10;
+    int bulletcount=20;
+    boolean bulletcheck=true;
 
     private int targetX;
     private int targetY;
     private boolean isMoving = false;
     int animationIndex = 0, animationIndex2 = 0;
-    int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
-    boolean mult=false;
+//    int x2=-1000,y2=-1000;// when use multi make it equal null  : int x2,y2
+    int x2=1 ,y2=0;
+    boolean mult=true;
     int maxWidth = 100;
     int maxHeight = 100;
     int x = maxWidth/2, y = maxHeight/2;
@@ -39,22 +43,35 @@ public class AnimGLEventListener4 extends AnimListener {
     long gameStartTime;
     int initialTime = 60;
     double powerHealth = 0;
+    double powerHealth2 = 0;
     int numIndex1 = 0;
     int numIndex2 = 0;
     int score;
     boolean heart1 =true;
     boolean heart2 =true;
     boolean heart3 =true;
-    boolean level = true;
+    boolean level = false;
     boolean level1 =true;
     boolean level2 = true;
     boolean level3 = true;
+<<
     boolean win = false;
     String scoreKey="scores";
     String userName = "";
      Integer highScore = Constants.highScore;
 
 
+=
+    boolean Heart1 =true;
+    boolean Heart2 =true;
+    boolean Heart3 =true;
+    boolean Level = false;
+    boolean Level1 =true;
+    boolean Level2 = true;
+    boolean Level3 = true;
+    double t=1;
+    double t2=1;
+>
 
     String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
@@ -989,6 +1006,7 @@ public class AnimGLEventListener4 extends AnimListener {
             return;
         }
 
+
         drawScore(gl);
         displayNumbers(gl);
         DrawSprite(gl,0,90,17,0.3f,Directions.up);
@@ -1031,6 +1049,36 @@ public class AnimGLEventListener4 extends AnimListener {
             DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
             if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
                 bulletsToRemove.add(bullet);
+
+        int bulletIndex = 9;
+        bullets2.add(new Bullet(x2, y2, bulletIndex, direction2));
+        lastBulletTime2 = currentTime;
+    }
+    voice vic=new voice();
+
+    int cnt=0;
+    List<monstor>list=new ArrayList<>();
+    List<Blood> bloodList = new ArrayList<>();
+
+    int zombieIndex;
+    long changeLag = System.currentTimeMillis();
+    long startTime = System.currentTimeMillis();
+
+    boolean isCollided = false;
+    boolean isCollided2 = false;
+    int screen =0;
+
+    public void display(GLAutoDrawable gld) {
+        GL gl = gld.getGL();
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        gl.glLoadIdentity();
+        switch (screen){
+            case 0:
+                drawHome(gld);
+                break;
+            case 1:
+                drawLevels(gld);
+
                 break;
             }
             for (monstor m : list) {
@@ -1168,21 +1216,45 @@ public class AnimGLEventListener4 extends AnimListener {
         drawScore(gl);
         displayNumbers(gl);
         DrawSprite(gl,0,90,17,0.3f,Directions.up);
-        handleKeyPress();
 //        handleMouse();
-        animationIndex = animationIndex % 4;
-        animationIndex2 = animationIndex2 % 4;
-        DrawSprite(gl,x,y,animationIndex,1, direction1);
-        if(mult)
-            DrawSprite(gl,x2,y2,animationIndex2,1,direction2);
+        handleKeyPress();
+        if(level) {
+            DrawSprite(gl, x, y, 28, 1.0f, Directions.up);
+            t = t - 0.1;
+            if (t < 0) {
+                powerHealth = 0;
+                level = false;
+                t = 1;
+            }
+        }else {
+                animationIndex = animationIndex % 4;
+                DrawSprite(gl,x,y,animationIndex,1, direction1);
+            }
+
+        if(mult) {
+            if(Level) {
+                DrawSprite(gl, x2, y2, 28, 1.0f, Directions.up);
+                t2=t2-0.1;
+                if(t2 < 0){
+                    powerHealth2=0;
+                    Level= false;
+                    t2=1;
+                }
+            }else {
+                animationIndex2 = animationIndex2 % 4;
+                DrawSprite(gl, x2, y2, animationIndex2, 1, direction2);
+            }
+            Health2(gl);
+        }
+        Health(gl);
         long currentTime=System.currentTimeMillis();
         if (currentTime-changeLag>=200){
             zombieIndex=(int)(Math.random()*4)+5;
         }
         if(cnt<10) {
             if (currentTime - startTime >= 4000) {
-                int rx = (int) (Math.random() * maxWidth) -maxHeight-10;
-                int ry = (int) (Math.random() * maxHeight) -maxHeight-10;
+                int rx = (int) (Math.random() *2* maxWidth) -maxHeight;
+                int ry = (int) (Math.random() *2* maxHeight) -maxHeight;
                 list.add(new monstor(rx, ry, zombieIndex, 1, Directions.down));
                 startTime = currentTime;
                 cnt++;
@@ -1199,40 +1271,69 @@ public class AnimGLEventListener4 extends AnimListener {
                 powerHealth = powerHealth+0.005;
                 isCollided=false;
             }
-        }
-        List<Bullet> bulletsToRemove = new ArrayList<>();
-        List<monstor> monstersToRemove = new ArrayList<>();
-        for (Bullet bullet : bullets) {
-            bullet.move();
-            DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
-            if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
-                bulletsToRemove.add(bullet);
-                break;
-            }
-            for (monstor m : list) {
-                if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
-                    if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
-                        System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
-                        bulletsToRemove.add(bullet);
-                        monstersToRemove.add(m);
-                        list.remove(m);
-                        if(numIndex2 < 9){
-                            numIndex2++;
-                        }
-                        else  { // if score = 20
-                            numIndex2 = 0;
-                            numIndex1 ++;
-                        }
-                        bloodList.add(new Blood(m.x, m.y));
-                        break;
-                    } else {
-                        System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
-                    }
+            if(mult){
+                double dist2 = sqrdDistance(x2,y2,m.x,m.y);
+                double radii2 = Math.pow(0.5*0.1*maxHeight+0.5*0.1*maxHeight,2);
+                isCollided2 = dist2<=90;
+                System.out.println(isCollided2 + ", "+ dist2 + ", "+ radii2);
+                if(isCollided2){
+                    powerHealth2 = powerHealth2+0.005;
+                    isCollided2=false;
                 }
             }
         }
-        bullets.removeAll(bulletsToRemove);
-        list.removeAll(monstersToRemove);
+        if (!Level3){
+            mult=false;
+            x2 = -10000;
+            y2 = -10000;
+        }
+        if(!mult){
+            Level3 = false;
+        }
+        if(!level3 && !Level3){
+            gameOver= true;
+        }
+        List<Bullet> bulletsToRemove = new ArrayList<>();
+        List<monstor> monstersToRemove = new ArrayList<>();
+        if (bulletcount>0) {
+            for (Bullet bullet : bullets) {
+                bullet.move();
+                DrawSprite(gl, bullet.x, bullet.y, bullet.textureIndex, 0.5f, bullet.direction);
+                if (bullet.x <= 0 || bullet.x >= maxWidth || bullet.y <= 0 || bullet.y >= maxHeight) {
+                    bulletsToRemove.add(bullet);
+                    if (bulletcheck) {
+                        bulletcount--;
+                        if (bulletcount <= 0) {
+                            bulletcheck = false;
+                        }
+                    }
+                }
+                for (monstor m : list) {
+                    if (sqrdDistance(bullet.x, bullet.y, m.x, m.y) < 100) {
+                        if (isInDirection(bullet.direction, bullet.x, bullet.y, m.x, m.y)) {
+                            System.out.println("Hit: Bullet at (" + bullet.x + ", " + bullet.y + ") Monster at (" + m.x + ", " + m.y + ")");
+                            bulletsToRemove.add(bullet);
+                            monstersToRemove.add(m);
+                            zombieCount--;
+                            bulletcount--;
+                            list.remove(m);
+                            if (numIndex2 < 9) {
+                                numIndex2++;
+                            } else { // if score = 20
+                                numIndex2 = 0;
+                                numIndex1++;
+                            }
+                            bloodList.add(new Blood(m.x, m.y));
+                            break;
+                        } else {
+                            System.out.println("Miss: Monster at (" + m.x + ", " + m.y + ") not in direction.");
+                        }
+                    }
+                }
+            }
+            bullets.removeAll(bulletsToRemove);
+            list.removeAll(monstersToRemove);
+        }
 //.....................
         for (Bullet bullet : bullets2) {
             bullet.move();
@@ -1270,44 +1371,6 @@ public class AnimGLEventListener4 extends AnimListener {
         if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
             gameOver = true;
         }
-        if(level1 || level2 || level3) {
-            // the basic of powerHealth
-            PowerHealth(gl, 0.7, 0.9, 0.33, 0.06, 29);
-            // the green of powerHealth
-            PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 30);
-            // the yellow of powerHealth
-            if (powerHealth < 0.5 && powerHealth > 0.2) {
-                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 31);
-            }
-            // the red of powerHealth
-            if (powerHealth < 0.7 && powerHealth > 0.5) {
-                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.05, 32);
-            }
-        }
-        if(heart1){
-            PowerHealth(gl , 0.0079,0.9,0.05,0.05,33);}
-        if(heart2){
-            PowerHealth(gl , 0.15,0.9,0.05,0.05,33);}
-        if(heart3){
-            PowerHealth(gl , 0.3,0.9,0.05,0.05,33);}
-
-        if (powerHealth > 0.62) {
-            if (level1) {
-                heart3 = false;
-                level1 = false;
-            } else if (level2) {
-                heart2 = false;
-                level2 = false;
-            } else if (level3) {
-                heart1 = false;
-                level3 = false;
-            }
-            powerHealth = 0;
-        }
-
-
-
-
         //apeare blood
         for (Blood blood : bloodList) {
             if (blood.isVisible && !blood.isExpired()) {
@@ -1316,6 +1379,11 @@ public class AnimGLEventListener4 extends AnimListener {
                 blood.isVisible = false;
             }
         }
+        DrawSprite(gl, 90, 0, 5, 0.5f, Directions.down);
+        DrawSprite(gl, 0, 0, 9, 0.8f, Directions.down);
+
+        drawZombieCount(gl, zombieCount);
+        drawbulletCount(gl,bulletcount);
     }
     public boolean isInDirection(Directions direction, float bulletX, float bulletY, float monsterX, float monsterY) {
         switch (direction) {
@@ -1492,6 +1560,21 @@ public class AnimGLEventListener4 extends AnimListener {
 
         gl.glDisable(GL.GL_BLEND);
     }
+    public void drawZombieCount(GL gl, int zombieCount) {
+        int tens = zombieCount / 10;
+        int ones = zombieCount % 10;
+        DrawSprite(gl, 86, -1, textures.length - 25 + (ones - 1), 0.4f, Directions.up);
+        DrawSprite(gl, 82, -1, textures.length - 25 + (tens - 1), 0.4f, Directions.up);
+
+    }
+
+    public void drawbulletCount(GL gl, int zombieCount) {
+        int tens = zombieCount / 10;
+        int ones = zombieCount % 10;
+        DrawSprite(gl, 7, -1, textures.length - 25 + (ones - 1), 0.4f, Directions.up);
+        DrawSprite(gl, 3, -1, textures.length - 25 + (tens - 1), 0.4f, Directions.up);
+
+    }
     public void drawTimer(GL gl, int time) {
         int tens = time / 10;
         int ones = time % 10;
@@ -1590,6 +1673,80 @@ public class AnimGLEventListener4 extends AnimListener {
         gl.glPopMatrix();
 
         gl.glDisable(GL.GL_BLEND);
+    }
+    public void Health(GL gl){
+        if(level1 || level2 || level3) {
+            // the basic of powerHealth
+            PowerHealth(gl, 0.7, 0.9, 0.33, 0.04, 29);
+            // the green of powerHealth
+            PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.03, 30);
+            // the yellow of powerHealth
+            if (powerHealth < 0.5 && powerHealth > 0.2) {
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.03, 31);
+            }
+            // the red of powerHealth
+            if (powerHealth < 0.7 && powerHealth > 0.5) {
+                PowerHealth(gl, 0.7 + powerHealth, 0.9, 0.32, 0.03, 32);
+            }
+        }
+        if(heart1){
+            PowerHealth(gl , 0.0079,0.9,0.04,0.04,33);}
+        if(heart2){
+            PowerHealth(gl , 0.15,0.9,0.04,0.04,33);}
+        if(heart3){
+            PowerHealth(gl , 0.3,0.9,0.04,0.04,33);}
+
+        if (powerHealth > 0.62) {
+            if (level1) {
+                heart3 = false;
+                level1 = false;
+            } else if (level2) {
+                heart2 = false;
+                level2 = false;
+            } else if (level3) {
+                heart1 = false;
+                level3 = false;
+            }
+            powerHealth = 0;
+            level = true;
+        }
+    }
+    public void Health2(GL gl){
+        if(Level1 || Level2 || Level3) {
+            // the basic of powerHealth
+            PowerHealth(gl, 0.7, 0.8, 0.33, 0.04, 29);
+            // the green of powerHealth
+            PowerHealth(gl, 0.7 + powerHealth2, 0.8, 0.32, 0.03, 30);
+            // the yellow of powerHealth
+            if (powerHealth2 < 0.5 && powerHealth2 > 0.2) {
+                PowerHealth(gl, 0.7 + powerHealth2, 0.8, 0.32, 0.03, 31);
+            }
+            // the red of powerHealth
+            if (powerHealth2 < 0.7 && powerHealth2 > 0.5) {
+                PowerHealth(gl, 0.7 + powerHealth2, 0.8, 0.32, 0.03, 32);
+            }
+        }
+        if(Heart1){
+            PowerHealth(gl , 0.0079,0.8,0.04,0.04,33);}
+        if(Heart2){
+            PowerHealth(gl , 0.15,0.8,0.04,0.04,33);}
+        if(Heart3){
+            PowerHealth(gl , 0.3,0.8,0.04,0.04,33);}
+
+        if (powerHealth2 > 0.62) {
+            if (Level1) {
+                Heart3 = false;
+                Level1 = false;
+            } else if (Level2) {
+                Heart2 = false;
+                Level2 = false;
+            } else if (Level3) {
+                Heart1 = false;
+                Level3 = false;
+            }
+            powerHealth2 = 0;
+            Level = true;
+        }
     }
 
     public void handleKeyPress() {
@@ -1784,13 +1941,35 @@ public class AnimGLEventListener4 extends AnimListener {
 
     }
 
+    int prevX=-1,prevY=0;
 
 
     public void mouseMoved(MouseEvent e) {
         targetX = (int) ((e.getX() / (double) maxWidth) * maxWidth);
         targetY = maxHeight - (int) ((e.getY() / (double) maxHeight) * maxHeight);
+        if (prevX==-1&&prevY==-1) {
+            prevX=targetX;
+            prevY=targetY;
+            return;
+        }
+        int dx=targetX-prevX;
+        int dy=targetY-prevY;
+        int sqrt=dx*dx+dy*dy;
+        if(sqrt>100) {
+            if(Math.abs(dx)>Math.abs(dy)) {
+                direction1=(dx>0)?Directions.right:Directions.left;
+            } else direction1=(dy>0)?Directions.up:Directions.down;
 
-        isMoving = true;
+            if (dx != 0 && dy != 0) {
+                if (dx>0&&dy>0)direction1=Directions.up_right;
+                if (dx>0&&dy<0)direction1=Directions.down_right;
+                if (dx<0&&dy>0)direction1=Directions.up_left;
+                if (dx<0&&dy<0)direction1=Directions.down_left;
+            }
+        }
+        prevX=targetX;
+        prevY=targetY;
+
 
     }
 
