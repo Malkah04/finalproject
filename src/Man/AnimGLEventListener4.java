@@ -38,13 +38,12 @@ public class AnimGLEventListener4 extends AnimListener {
     int x = maxWidth/2, y = maxHeight/2;
     boolean gameOver = false;
     int gameDuration = 67000;
-    long gameStartTime;
+    long gameStartTime ;
     int initialTime = 60;
     double powerHealth = 0;
     double powerHealth2 = 0;
     int numIndex1 = 0;
     int numIndex2 = 0;
-    int score;
     boolean heart1 =true;
     boolean heart2 =true;
     boolean heart3 =true;
@@ -63,6 +62,7 @@ public class AnimGLEventListener4 extends AnimListener {
     double t2=1;
     int cnt=10;
     int zombieCount = cnt;
+
 
     String[] textureNames ={"sprite-sheet_0 (1).png","sprite-sheet_0 (3).png","sprite-sheet_0 (4).png"
             ,"sprite-sheet_0 (5).png","sprite-sheet_0 (6).png","zombie top 1.png","zombie top 2.png"
@@ -102,13 +102,7 @@ public class AnimGLEventListener4 extends AnimListener {
                 e.printStackTrace();
             }
             if(!gameOver)playMusic(0);
-
-
         }
-        if(mult){
-            score = cnt;
-        } else score = cnt;
-
         gameStartTime = System.currentTimeMillis();
     }
     public void shootBullet() {
@@ -144,10 +138,12 @@ public class AnimGLEventListener4 extends AnimListener {
     boolean isCollided2 = false;
     int screen =0;
 
+
     public void display(GLAutoDrawable gld) {
         GL gl = gld.getGL();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         gl.glLoadIdentity();
+
         switch (screen){
             case 0:
                 drawHome(gld);
@@ -225,9 +221,10 @@ public class AnimGLEventListener4 extends AnimListener {
 
                 break;
         }
-
-
-
+        long current = System.currentTimeMillis();
+        if(current - gameStartTime >= gameDuration && !list.isEmpty()){
+            gameOver = true;
+        }
     }
     public void drawHome(GLAutoDrawable gld){
         GL gl = gld.getGL();
@@ -283,9 +280,10 @@ public class AnimGLEventListener4 extends AnimListener {
     public void drawLevel1(GLAutoDrawable gld){
         GL gl = gld.getGL();
         DrawBackground(gl);
+
               med=true;
 //              if(med)score=7;
-        if(numIndex1 == score/10){
+        if(zombieCount == 0){
             drawYouWin(gl);
             SoundEf(5);
             return;
@@ -402,7 +400,7 @@ public class AnimGLEventListener4 extends AnimListener {
                             list.remove(m);
                             if (numIndex2 < 9) {
                                 numIndex2++;
-                            } else { // if score = 20
+                            } else { // if score > 10
                                 numIndex2 = 0;
                                 numIndex1++;
                             }
@@ -451,9 +449,7 @@ public class AnimGLEventListener4 extends AnimListener {
         }
         drawTimer(gl,initialTime);
 
-        if(currentTime - gameStartTime >= gameDuration && !list.isEmpty()){
-            gameOver = true;
-        }
+
         //apeare blood
         for (Blood blood : bloodList) {
             if (blood.isVisible && !blood.isExpired()) {
